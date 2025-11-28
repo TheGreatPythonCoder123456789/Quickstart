@@ -24,11 +24,11 @@ public class Constants {
             .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD);
 
     public static ThreeWheelConstants localizerConstants = new ThreeWheelConstants()
-            .forwardTicksToInches(0.002000500125031255)
-            .strafeTicksToInches(0.0019884009942004953)
-            .turnTicksToInches(.001989436789)
-            .leftPodY(8)//
-            .rightPodY(-8.5)//
+            .forwardTicksToInches(0.002000500125031255) // check and redo (direction for encoders)
+            .strafeTicksToInches(0.0019884009942004953) // check and redo (direction for encoders)
+            .turnTicksToInches(.001989436789) //check and redo (direction for encoders)
+            .leftPodY(8)// https://pedropathing.com/docs/pathing/tuning/localization/three-wheel
+            .rightPodY(-8.5)// check them
             .strafePodX(0)
             .rightEncoder_HardwareMapName("backLeft")
             .leftEncoder_HardwareMapName("frontLeft")
