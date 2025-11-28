@@ -13,7 +13,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 public class Constants {
 
     public static MecanumConstants driveConstants = new MecanumConstants()
-            .maxPower(1)
+            .maxPower(.96)
             .rightFrontMotorName("frontRight")
             .rightRearMotorName("backRight")
             .leftRearMotorName("backLeft")
@@ -39,8 +39,17 @@ public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(15);
 //hello
-    public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
-
+    public static PathConstraints pathConstraints = new PathConstraints(0.98, 15, 0.7, 0.9);
+    /*
+            tValueConstraint,    // When to consider path "complete" (0.0-1.0)
+            timeoutConstraint,   // Maximum time allowed for path (seconds)
+            brakingStrength,     // How aggressively to brake at end (0.0-1.0)
+            brakingStart         // When to start braking (0.0-1.0 of path completion)
+            0.98,   // tValueConstraint: Stop when 98% of path is complete
+            15.0,    // timeoutConstraint: 15 second maximum per path
+            0.7,    // brakingStrength: Moderate braking (70% strength)
+            0.9     // brakingStart: Start braking at 90% of path completion
+    */
     public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)
                 .threeWheelLocalizer(localizerConstants)
