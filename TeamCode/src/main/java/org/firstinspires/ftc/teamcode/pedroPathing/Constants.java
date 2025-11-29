@@ -34,7 +34,7 @@ public class Constants {
             .leftEncoder_HardwareMapName("frontRight")
             .strafeEncoder_HardwareMapName("intakeTop")
             .leftEncoderDirection(Encoder.REVERSE)
-            .rightEncoderDirection(Encoder.FORWARD)
+            .rightEncoderDirection(Encoder.REVERSE)
             .strafeEncoderDirection(Encoder.FORWARD);
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(15);
