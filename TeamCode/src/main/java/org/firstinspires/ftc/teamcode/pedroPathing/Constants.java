@@ -30,9 +30,9 @@ public class Constants {
             .leftPodY(8)// https://pedropathing.com/docs/pathing/tuning/localization/three-wheel
             .rightPodY(-8.5)// check them
             .strafePodX(0)
-            .rightEncoder_HardwareMapName("backLeft")
-            .leftEncoder_HardwareMapName("frontLeft")
-            .strafeEncoder_HardwareMapName("frontRight")
+            .rightEncoder_HardwareMapName("backLeft")//change
+            .leftEncoder_HardwareMapName("frontRight")
+            .strafeEncoder_HardwareMapName("intakeTop")
             .leftEncoderDirection(Encoder.REVERSE)
             .rightEncoderDirection(Encoder.FORWARD)
             .strafeEncoderDirection(Encoder.FORWARD);
