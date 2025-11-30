@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.pedroPathing;
 
+import com.pedropathing.control.PIDFCoefficients;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.ftc.FollowerBuilder;
@@ -21,7 +22,9 @@ public class Constants {
             .leftFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
             .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
             .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
-            .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD);
+            .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
+            .xVelocity(63.09182251326858)
+            .yVelocity(51.26808593315976);
 
     public static ThreeWheelConstants localizerConstants = new ThreeWheelConstants()
             .forwardTicksToInches(0.0019742365894729686) // check and redo (direction for encoders)
@@ -37,7 +40,10 @@ public class Constants {
             .rightEncoderDirection(Encoder.REVERSE)
             .strafeEncoderDirection(Encoder.FORWARD);
     public static FollowerConstants followerConstants = new FollowerConstants()
-            .mass(15);
+            .mass(15)
+            .forwardZeroPowerAcceleration(-38.72960408654546)
+            .lateralZeroPowerAcceleration(-55.23187564761812);
+            //.translationalPIDFCoefficients(new PIDFCoefficients(0.1, 0, 0.01, 0));
 //hello
     public static PathConstraints pathConstraints = new PathConstraints(0.98, 15, 0.7, 0.9);
     /*
