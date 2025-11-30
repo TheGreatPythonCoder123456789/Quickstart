@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.pedroPathing;
 
+import com.pedropathing.control.FilteredPIDFCoefficients;
 import com.pedropathing.control.PIDFCoefficients;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.FollowerConstants;
@@ -44,8 +45,8 @@ public class Constants {
             .forwardZeroPowerAcceleration(-38.72960408654546)
             .lateralZeroPowerAcceleration(-55.23187564761812)
             .translationalPIDFCoefficients(new PIDFCoefficients(0.2, 0, 0.02, 0.015))
-            .headingPIDFCoefficients(new PIDFCoefficients(1, 0, 0.1, 0.015));
-            //save the breaking strength constants on robot AND TEST!!
+            .headingPIDFCoefficients(new PIDFCoefficients(1, 0, 0.1, 0.015))
+            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.025,0.0,0.001,0.6,0.01));
     public static PathConstraints pathConstraints = new PathConstraints(0.92, 15, 0.80, 0.80);
     /*
             tValueConstraint,    // When to consider path "complete" (0.0-1.0)
