@@ -28,7 +28,7 @@ public class Constants {
             .strafeTicksToInches(0.0019917627182528697) // check and redo (direction for encoders)
             .turnTicksToInches(.002025566753320759) //check and redo (direction for encoders)
             .leftPodY(8)// https://pedropathing.com/docs/pathing/tuning/localization/three-wheel
-            .rightPodY(-8.5)// check them
+            .rightPodY(-8)
             .strafePodX(0)
             .rightEncoder_HardwareMapName("fakeMotor")
             .leftEncoder_HardwareMapName("frontRight")
