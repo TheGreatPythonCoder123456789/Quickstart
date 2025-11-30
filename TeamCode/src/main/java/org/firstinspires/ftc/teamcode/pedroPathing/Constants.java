@@ -45,8 +45,8 @@ public class Constants {
             .lateralZeroPowerAcceleration(-55.23187564761812)
             .translationalPIDFCoefficients(new PIDFCoefficients(0.2, 0, 0.02, 0.015))
             .headingPIDFCoefficients(new PIDFCoefficients(1, 0, 0.1, 0.015));
-//hello
-    public static PathConstraints pathConstraints = new PathConstraints(0.92, 15, 0.7, 0.7);
+            //save the breaking strength constants on robot AND TEST!!
+    public static PathConstraints pathConstraints = new PathConstraints(0.92, 15, 0.80, 0.80);
     /*
             tValueConstraint,    // When to consider path "complete" (0.0-1.0)
             timeoutConstraint,   // Maximum time allowed for path (seconds)
@@ -54,8 +54,8 @@ public class Constants {
             brakingStart         // When to start braking (0.0-1.0 of path completion)
             0.92,   // tValueConstraint: Stop when 92% of path is complete
             15.0,    // timeoutConstraint: 15 second maximum per path
-            0.7,    // brakingStrength: Moderate braking (70% strength)
-            0.7     // brakingStart: Start braking at 70% of path completion
+            0.80,    // brakingStrength: Moderate braking (80% strength)
+            0.80     // brakingStart: Start braking at 80% of path completion
     */
     public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)
