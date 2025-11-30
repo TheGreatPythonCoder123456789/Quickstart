@@ -46,7 +46,8 @@ public class Constants {
             .lateralZeroPowerAcceleration(-55.23187564761812)
             .translationalPIDFCoefficients(new PIDFCoefficients(0.2, 0, 0.02, 0.015))
             .headingPIDFCoefficients(new PIDFCoefficients(1, 0, 0.1, 0.015))
-            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.025,0.0,0.001,0.6,0.01));
+            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.025,0.0,0.001,0.6,0.01))
+            .centripetalScaling(0.005);
     public static PathConstraints pathConstraints = new PathConstraints(0.92, 15, 0.80, 0.80);
     /*
             tValueConstraint,    // When to consider path "complete" (0.0-1.0)
