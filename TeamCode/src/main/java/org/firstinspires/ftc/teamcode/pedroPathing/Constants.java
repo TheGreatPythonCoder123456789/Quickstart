@@ -42,19 +42,20 @@ public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(15)
             .forwardZeroPowerAcceleration(-38.72960408654546)
-            .lateralZeroPowerAcceleration(-55.23187564761812);
-            //.translationalPIDFCoefficients(new PIDFCoefficients(0.1, 0, 0.01, 0));
+            .lateralZeroPowerAcceleration(-55.23187564761812)
+            .translationalPIDFCoefficients(new PIDFCoefficients(0.2, 0, 0.02, 0.015))
+            .headingPIDFCoefficients(new PIDFCoefficients(1, 0, 0.1, 0.015));
 //hello
-    public static PathConstraints pathConstraints = new PathConstraints(0.98, 15, 0.7, 0.9);
+    public static PathConstraints pathConstraints = new PathConstraints(0.92, 15, 0.7, 0.7);
     /*
             tValueConstraint,    // When to consider path "complete" (0.0-1.0)
             timeoutConstraint,   // Maximum time allowed for path (seconds)
             brakingStrength,     // How aggressively to brake at end (0.0-1.0)
             brakingStart         // When to start braking (0.0-1.0 of path completion)
-            0.98,   // tValueConstraint: Stop when 98% of path is complete
+            0.92,   // tValueConstraint: Stop when 92% of path is complete
             15.0,    // timeoutConstraint: 15 second maximum per path
             0.7,    // brakingStrength: Moderate braking (70% strength)
-            0.9     // brakingStart: Start braking at 90% of path completion
+            0.7     // brakingStart: Start braking at 70% of path completion
     */
     public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)
