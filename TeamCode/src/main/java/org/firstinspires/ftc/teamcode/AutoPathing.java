@@ -56,7 +56,7 @@ public class AutoPathing extends OpMode {
             case SHOOT_PRELOAD:
                 // check is follower done it's path?
                 // and check that 5 seconds has elapsed
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 5) {
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 3.5) {
                     follower.followPath(driveShootPosEndPos, true); // TODO add logic to flywheel shooter
                     setPathState(PathState.DRIVE_SHOOTPOS_ENDPOS);
                 }
