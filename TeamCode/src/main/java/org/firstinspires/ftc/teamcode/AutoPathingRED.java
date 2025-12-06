@@ -11,8 +11,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 // when preloading back up the last ball a little (test there to find distance)
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@TeleOp(name="AutoPathing", group="TeleOp")
-public class AutoPathing extends OpMode {
+@TeleOp(name="AutonPathingRED", group="TeleOp")
+public class AutoPathingRED extends OpMode {
 
     private enum AutoState {
         DRIVE_PATH1,
@@ -147,11 +147,12 @@ public class AutoPathing extends OpMode {
 
                     // Define the timeline for each pulse and pause
                     // Ball 0: Pulse (0.4s), Pause (1.0s) -> End at 1.4s
-                    // Ball 1: Pulse (1.4s), Pause (1.0s) -> End at 3.8s (1.4 + 1.0 + 1.4)
-                    // Ball 2: Pulse (1.4s), Pause (1.0s) -> End at 6.2s (3.8 + 1.4 + 1.0)
+                    // Ball 1: Pulse (1.4s), Pause (1.0s) -> End at 2.4s (1.4 + 1.0 = 2.4s)
+                    // Ball 1: Shooter Acceleration Delay (1.0s) -> End at 3.4s (2.4 + 1.0 = 3.4s)
+                    // Ball 2: Pulse (1.4s), Pause (1.0s) -> End at 5.8s (3.4 + 1.4 + 1.0 = 5.8s)
                     double timeForBall0 = INTAKE_PULSE_TIME + INTAKE_PAUSE_TIME; // 0.4 + 1.0 = 1.4s
-                    double timeForBall1 = (INTAKE_PULSE_TIME + 1.0) + INTAKE_PAUSE_TIME; // 1.4 + 1.0 = 2.4s
-                    double timeForBall2 = (INTAKE_PULSE_TIME + 1.0) + INTAKE_PAUSE_TIME; // 1.4 + 1.0 = 2.4s
+                    double timeForBall1 = INTAKE_PULSE_TIME + INTAKE_PAUSE_TIME; // 0.4 + 1.0 = 1.4s
+                    double shooterAccelTime = 1.0; // Additional 1 second for shooter acceleration
 
                     // Check if we have completed each specific pulse/pause cycle based on the timeline
                     if (pulsesCompleted == 0) {
@@ -172,34 +173,40 @@ public class AutoPathing extends OpMode {
                             }
                         }
                     } else if (pulsesCompleted == 1) {
-                        // Check if Ball 1's pulse+pause cycle is complete (reached 1.4 + 2.4 = 3.8s)
-                        if (t >= (timeForBall0 + timeForBall1)) {
+                        // Check if Ball 1's pulse+pause+acceleration cycle is complete (reached 3.4s)
+                        if (t >= (timeForBall0 + timeForBall1 + shooterAccelTime)) {
                             pulsesCompleted = 2; // Move to Ball 2
                             intakeTop.setPower(0); // Ensure intake is off when moving to next pulse
                             intakeActive = false;
                         } else {
                             // Still in Ball 1's cycle (starts after timeForBall0 = 1.4s)
                             double timeIntoBall1Cycle = t - timeForBall0; // Time elapsed since Ball 1 started
-                            boolean inPulse1 = (timeIntoBall1Cycle < (INTAKE_PULSE_TIME + 1.0)); // Ball 1 pulse is 1.4s
-                            if (inPulse1 && !intakeActive) {
-                                intakeTop.setPower(INTAKE_REVERSE_POWER); // Use negative power
-                                intakeActive = true;
-                            } else if (!inPulse1 && intakeActive) {
-                                intakeTop.setPower(0);
-                                intakeActive = false;
+
+                            // During the first 1.4 seconds of Ball 1's cycle, run intake
+                            if (timeIntoBall1Cycle < timeForBall1) {
+                                boolean inPulse1 = (timeIntoBall1Cycle < INTAKE_PULSE_TIME); // Ball 1 pulse is 0.4s
+                                if (inPulse1 && !intakeActive) {
+                                    intakeTop.setPower(INTAKE_REVERSE_POWER); // Use negative power
+                                    intakeActive = true;
+                                } else if (!inPulse1 && intakeActive) {
+                                    intakeTop.setPower(0);
+                                    intakeActive = false;
+                                }
                             }
+                            // During the last 1.0 second (acceleration delay), keep shooter running but don't run intake
+                            // This is handled by the overall state keeping shooter running
                         }
                     } else if (pulsesCompleted == 2) { // Ball 2
-                        // Check if Ball 2's pulse+pause cycle is complete (reached 1.4 + 2.4 + 2.4 = 6.2s)
-                        if (t >= (timeForBall0 + timeForBall1 + timeForBall2)) {
+                        // Check if Ball 2's pulse+pause cycle is complete (reached 3.4 + 1.4 + 1.0 = 5.8s)
+                        if (t >= (timeForBall0 + timeForBall1 + shooterAccelTime + timeForBall1)) {
                             pulsesCompleted = 3; // All balls fired
                             intakeTop.setPower(0); // Ensure intake is off before moving to next state
                             intakeActive = false;
                             // Transition will happen on next loop iteration because pulsesCompleted is now >= NUM_BALLS_TO_FIRE
                         } else {
-                            // Still in Ball 2's cycle (starts after timeForBall0 + timeForBall1 = 3.8s)
-                            double timeIntoBall2Cycle = t - (timeForBall0 + timeForBall1); // Time elapsed since Ball 2 started
-                            boolean inPulse2 = (timeIntoBall2Cycle < (INTAKE_PULSE_TIME + 1.0)); // Ball 2 pulse is 1.4s
+                            // Still in Ball 2's cycle (starts after timeForBall0 + timeForBall1 + shooterAccelTime = 3.4s)
+                            double timeIntoBall2Cycle = t - (timeForBall0 + timeForBall1 + shooterAccelTime); // Time elapsed since Ball 2 started
+                            boolean inPulse2 = (timeIntoBall2Cycle < INTAKE_PULSE_TIME); // Ball 2 pulse is 0.4s
                             if (inPulse2 && !intakeActive) {
                                 intakeTop.setPower(INTAKE_REVERSE_POWER); // Use negative power
                                 intakeActive = true;
