@@ -28,10 +28,10 @@ public class Constants {
             .yVelocity(51.26808593315976);
 
     public static ThreeWheelConstants localizerConstants = new ThreeWheelConstants()
-            .forwardTicksToInches(0.0019742365894729686) // check and redo (direction for encoders)
-            .strafeTicksToInches(0.0019917627182528697) // check and redo (direction for encoders)
-            .turnTicksToInches(.002025566753320759) //check and redo (direction for encoders)
-            .leftPodY(8)// https://pedropathing.com/docs/pathing/tuning/localization/three-wheel
+            .forwardTicksToInches(0.0019742365894729686)
+            .strafeTicksToInches(0.0019917627182528697)
+            .turnTicksToInches(.002025566753320759)
+            .leftPodY(8)
             .rightPodY(-8)
             .strafePodX(0)
             .rightEncoder_HardwareMapName("fakeMotor")
@@ -40,6 +40,7 @@ public class Constants {
             .leftEncoderDirection(Encoder.REVERSE)
             .rightEncoderDirection(Encoder.REVERSE)
             .strafeEncoderDirection(Encoder.FORWARD);
+
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(15)
             .forwardZeroPowerAcceleration(-38.72960408654546)
@@ -48,6 +49,7 @@ public class Constants {
             .headingPIDFCoefficients(new PIDFCoefficients(1, 0, 0.1, 0.015))
             .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.025,0.0,0.001,0.6,0.01))
             .centripetalScaling(0.005);
+
     public static PathConstraints pathConstraints = new PathConstraints(0.92, 15, 0.80, 0.80);
     /*
             tValueConstraint,    // When to consider path "complete" (0.0-1.0)
@@ -59,10 +61,21 @@ public class Constants {
             0.80,    // brakingStrength: Moderate braking (80% strength)
             0.80     // brakingStart: Start braking at 80% of path completion
     */
+
+    // ORIGINAL method - uses default pathConstraints
     public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)
                 .threeWheelLocalizer(localizerConstants)
                 .pathConstraints(pathConstraints)
+                .mecanumDrivetrain(driveConstants)
+                .build();
+    }
+
+    // NEW method - allows custom path constraints
+    public static Follower createFollower(HardwareMap hardwareMap, PathConstraints customConstraints) {
+        return new FollowerBuilder(followerConstants, hardwareMap)
+                .threeWheelLocalizer(localizerConstants)
+                .pathConstraints(customConstraints)  // Use custom constraints instead of default
                 .mecanumDrivetrain(driveConstants)
                 .build();
     }

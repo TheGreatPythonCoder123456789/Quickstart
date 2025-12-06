@@ -4,6 +4,7 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
+import com.pedropathing.paths.PathConstraints;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.pedropathing.util.Timer;
@@ -11,9 +12,10 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@TeleOp
+@TeleOp(name="AutoPathing", group="TeleOp")
 public class AutoPathing extends OpMode {
     private Follower follower;
+    private Follower slowFollower;  // Separate follower for slow path
     private Timer pathTimer, opModeTimer;
 
     // Motor declarations
@@ -23,12 +25,17 @@ public class AutoPathing extends OpMode {
     private static final double INTAKE_POWER = 0.8;
     private static final double INTAKE_REVERSE_POWER = -0.8;
 
+    // Slow path constraints (0.27 max velocity for wheel motors)
+    private static final PathConstraints SLOW_CONSTRAINTS = new PathConstraints(0.27, 8, 0.80, 0.80);
+
     public enum PathState {
         DRIVE_STARTPOS_SHOOT_POS,
         SHOOT_PRELOAD,
         DRIVE_SHOOTPOS_INTAKE_POS,
         INTAKE_RING,
-        DRIVE_INTAKE_ENDPOS
+        DRIVE_INTAKE_ENDPOS,
+        DRIVE_TO_129_84,       // SLOW PATH for ball pickup
+        DRIVE_TO_84_99         // Back to shoot position
     }
 
     PathState pathState;
@@ -37,27 +44,42 @@ public class AutoPathing extends OpMode {
     private final Pose startPose = new Pose(87, 9, Math.toRadians(270));
     private final Pose shootPose = new Pose(84, 99, Math.toRadians(-143));
     private final Pose intakePose = new Pose(100, 84, Math.toRadians(0));
-    private final Pose endPose = new Pose(100, 84, Math.toRadians(0)); // Same as intake position
+    private final Pose endPose = new Pose(100, 84, Math.toRadians(0));
+    private final Pose newPose1 = new Pose(129, 84, Math.toRadians(0));
+    private final Pose newPose2 = new Pose(84, 99, Math.toRadians(-143));
 
     private PathChain driveStartPosShootPos, driveShootPosIntakePos, driveIntakeEndPos;
+    private PathChain driveTo129_84, driveTo84_99;
 
     public void buildPaths() {
-        // Path 1: Start position to shoot position
+        // Path 1: Start position to shoot position (normal speed)
         driveStartPosShootPos = follower.pathBuilder()
                 .addPath(new BezierLine(startPose, shootPose))
                 .setLinearHeadingInterpolation(startPose.getHeading(), shootPose.getHeading())
                 .build();
 
-        // Path 2: Shoot position to intake position
+        // Path 2: Shoot position to intake position (normal speed)
         driveShootPosIntakePos = follower.pathBuilder()
                 .addPath(new BezierLine(shootPose, intakePose))
                 .setLinearHeadingInterpolation(shootPose.getHeading(), intakePose.getHeading())
                 .build();
 
-        // Path 3: Intake position to end position (minimal movement)
+        // Path 3: Intake position to end position (normal speed)
         driveIntakeEndPos = follower.pathBuilder()
                 .addPath(new BezierLine(intakePose, endPose))
                 .setLinearHeadingInterpolation(intakePose.getHeading(), endPose.getHeading())
+                .build();
+
+        // Path 4: End position to (129, 84) - BUILT WITH SLOW FOLLOWER
+        driveTo129_84 = slowFollower.pathBuilder()
+                .addPath(new BezierLine(endPose, newPose1))
+                .setLinearHeadingInterpolation(endPose.getHeading(), newPose1.getHeading())
+                .build();
+
+        // Path 5: (129, 84) to (84, 99) - back to shoot position (normal speed)
+        driveTo84_99 = follower.pathBuilder()
+                .addPath(new BezierLine(newPose1, newPose2))
+                .setLinearHeadingInterpolation(newPose1.getHeading(), newPose2.getHeading())
                 .build();
     }
 
@@ -102,7 +124,9 @@ public class AutoPathing extends OpMode {
                 break;
 
             case DRIVE_SHOOTPOS_INTAKE_POS:
-                // Wait for path completion or 10 second timeout
+                // NO INTAKE RUNNING DURING THIS PATH
+                intakeTop.setPower(0); // Ensure intake is off
+
                 if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 10) {
                     // Start intake when we reach intake position
                     intakeTop.setPower(INTAKE_POWER);
@@ -122,7 +146,40 @@ public class AutoPathing extends OpMode {
             case DRIVE_INTAKE_ENDPOS:
                 // Wait for path completion or 10 second timeout
                 if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 10) {
+                    // Transition to SLOW PATH (129, 84)
+                    // Set slow follower's pose to current position
+                    Pose currentPose = follower.getPose();
+                    slowFollower.setPose(currentPose);
+
+                    // Follow the slow path
+                    slowFollower.followPath(driveTo129_84, true);
+                    intakeTop.setPower(INTAKE_REVERSE_POWER); // Run intake negative during slow path
+                    setPathState(PathState.DRIVE_TO_129_84);
+                }
+                break;
+
+            case DRIVE_TO_129_84:  // SLOW PATH STATE (0.27 max velocity)
+                // Wait for path completion or 10 second timeout
+                if (!slowFollower.isBusy() || pathTimer.getElapsedTimeSeconds() > 10) {
+                    // Stop intake and move to final path
+                    intakeTop.setPower(0);
+
+                    // Update normal follower's pose to current position
+                    Pose currentPose = slowFollower.getPose();
+                    follower.setPose(currentPose);
+
+                    // Follow final path back to shoot
+                    follower.followPath(driveTo84_99, true);
+                    setPathState(PathState.DRIVE_TO_84_99);
+                }
+                break;
+
+            case DRIVE_TO_84_99:  // Normal speed path
+                // Wait for path completion or 10 second timeout
+                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 10) {
                     telemetry.addLine("Done all Paths");
+                    setShooterPower(0);
+                    intakeTop.setPower(0);
                 }
                 break;
 
@@ -149,8 +206,11 @@ public class AutoPathing extends OpMode {
         pathTimer = new Timer();
         opModeTimer = new Timer();
 
-        // Initialize follower
+        // Initialize NORMAL follower with default constraints (0.92 max velocity)
         follower = Constants.createFollower(hardwareMap);
+
+        // Initialize SLOW follower with custom constraints (0.27 max velocity)
+        slowFollower = Constants.createFollower(hardwareMap, SLOW_CONSTRAINTS);
 
         // Initialize shooter and intake motors
         shootLeft = hardwareMap.get(DcMotor.class, "shootLeft");
@@ -178,13 +238,28 @@ public class AutoPathing extends OpMode {
 
     @Override
     public void loop() {
-        follower.update();
+        // Update the appropriate follower based on current state
+        if (pathState == PathState.DRIVE_TO_129_84) {
+            slowFollower.update();
+        } else {
+            follower.update();
+        }
+
         statePathUpdate();
 
         telemetry.addData("Path State", pathState.toString());
-        telemetry.addData("X", follower.getPose().getX());
-        telemetry.addData("Y", follower.getPose().getY());
-        telemetry.addData("Heading", Math.toDegrees(follower.getPose().getHeading()));
+        telemetry.addData("Active Follower", pathState == PathState.DRIVE_TO_129_84 ? "SLOW (0.27)" : "NORMAL (0.92)");
+
+        if (pathState == PathState.DRIVE_TO_129_84) {
+            telemetry.addData("X", slowFollower.getPose().getX());
+            telemetry.addData("Y", slowFollower.getPose().getY());
+            telemetry.addData("Heading", Math.toDegrees(slowFollower.getPose().getHeading()));
+        } else {
+            telemetry.addData("X", follower.getPose().getX());
+            telemetry.addData("Y", follower.getPose().getY());
+            telemetry.addData("Heading", Math.toDegrees(follower.getPose().getHeading()));
+        }
+
         telemetry.addData("Path Timer", pathTimer.getElapsedTimeSeconds());
         telemetry.addData("Shooter Left Power", shootLeft.getPower());
         telemetry.addData("Shooter Right Power", shootRight.getPower());
