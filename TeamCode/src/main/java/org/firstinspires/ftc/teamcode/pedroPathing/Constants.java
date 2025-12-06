@@ -50,32 +50,13 @@ public class Constants {
             .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.025,0.0,0.001,0.6,0.01))
             .centripetalScaling(0.005);
 
-    public static PathConstraints pathConstraints = new PathConstraints(0.92, 15, 0.80, 0.80);
-    /*
-            tValueConstraint,    // When to consider path "complete" (0.0-1.0)
-            timeoutConstraint,   // Maximum time allowed for path (seconds)
-            brakingStrength,     // How aggressively to brake at end (0.0-1.0)
-            brakingStart         // When to start braking (0.0-1.0 of path completion)
-            0.92,   // tValueConstraint: Stop when 92% of path is complete
-            15.0,    // timeoutConstraint: 15 second maximum per path
-            0.80,    // brakingStrength: Moderate braking (80% strength)
-            0.80     // brakingStart: Start braking at 80% of path completion
-    */
+    public static PathConstraints pathConstraints =
+            new PathConstraints(0.92, 15, 0.80, 0.80);
 
-    // ORIGINAL method - uses default pathConstraints
     public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)
                 .threeWheelLocalizer(localizerConstants)
                 .pathConstraints(pathConstraints)
-                .mecanumDrivetrain(driveConstants)
-                .build();
-    }
-
-    // NEW method - allows custom path constraints
-    public static Follower createFollower(HardwareMap hardwareMap, PathConstraints customConstraints) {
-        return new FollowerBuilder(followerConstants, hardwareMap)
-                .threeWheelLocalizer(localizerConstants)
-                .pathConstraints(customConstraints)  // Use custom constraints instead of default
                 .mecanumDrivetrain(driveConstants)
                 .build();
     }
