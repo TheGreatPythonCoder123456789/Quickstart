@@ -1,5 +1,5 @@
 package org.firstinspires.ftc.teamcode;
-
+//RUN / SAVE this code to robot (it is not saved yet) then test all the ones you can.
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.hardware.DcMotor;
-// when preloading back up the last ball a little (test there to find distance)
+// when preloading make all balls touching each other and close to shooter
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @TeleOp(name="AutonPathingRED", group="TeleOp")
@@ -100,7 +100,7 @@ public class AutoPathingRED extends OpMode {
 
     private void setShooterPower(double p) {
         shootLeft.setPower(p);
-        shootRight.setPower(-p); // you said this is correct
+        shootRight.setPower(-p); // this is good
     }
 
     private void setDrivePower(double lf, double rf, double lb, double rb) {

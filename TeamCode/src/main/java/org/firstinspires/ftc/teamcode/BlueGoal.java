@@ -1,5 +1,5 @@
 package org.firstinspires.ftc.teamcode;
-
+//RUN / SAVE this code to robot (it is not saved yet) then test all the ones you can.
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.hardware.DcMotor;
-// when preloading back up the last ball a little (test there to find distance)
+// when preloading make all balls touching each other and close to shooter
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @TeleOp(name="BlueGoal", group="TeleOp")
@@ -30,7 +30,6 @@ public class BlueGoal extends OpMode {
     private DcMotor frontLeft, frontRight, backLeft, backRight;
 
     private static final double SHOOTER_POWER = 0.35;
-    // Assuming negative power runs intake for both firing and pickup
     private static final double INTAKE_REVERSE_POWER = -0.8; // Negative power for intake
 
     private static final double SHOOTER_SPINUP_TIME = 3.0;
@@ -100,7 +99,7 @@ public class BlueGoal extends OpMode {
 
     private void setShooterPower(double p) {
         shootLeft.setPower(p);
-        shootRight.setPower(-p); // you said this is correct
+        shootRight.setPower(-p); // good direction
     }
 
     private void setDrivePower(double lf, double rf, double lb, double rb) {
@@ -145,14 +144,10 @@ public class BlueGoal extends OpMode {
                 if (pulsesCompleted < NUM_BALLS_TO_FIRE) {
                     double t = timer.getElapsedTimeSeconds();
 
-                    // Define the timeline for each pulse and pause
-                    // Ball 0: Pulse (0.4s), Pause (1.0s) -> End at 1.4s
-                    // Ball 1: Pulse (1.4s), Pause (1.0s) -> End at 2.4s (1.4 + 1.0 = 2.4s)
-                    // Ball 1: Shooter Acceleration Delay (1.0s) -> End at 3.4s (2.4 + 1.0 = 3.4s)
-                    // Ball 2: Pulse (1.4s), Pause (1.0s) -> End at 5.8s (3.4 + 1.4 + 1.0 = 5.8s)
+
                     double timeForBall0 = INTAKE_PULSE_TIME + INTAKE_PAUSE_TIME; // 0.4 + 1.0 = 1.4s
                     double timeForBall1 = INTAKE_PULSE_TIME + INTAKE_PAUSE_TIME; // 0.4 + 1.0 = 1.4s
-                    double shooterAccelTime = 1.0; // Additional 1 second for shooter acceleration?/
+                    double shooterAccelTime = 1.0; // Additional 1 second for shooter acceleration/
 
                     // Check if we have completed each specific pulse/pause cycle based on the timeline
                     if (pulsesCompleted == 0) {
