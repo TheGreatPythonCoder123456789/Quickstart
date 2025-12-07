@@ -11,8 +11,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 // when preloading back up the last ball a little (test there to find distance)
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@TeleOp(name="testBlue", group="TeleOp")
-public class TestBlue extends OpMode {
+@TeleOp(name="BlueGoal", group="TeleOp")
+public class BlueGoal extends OpMode {
 
     private enum AutoState {
         DRIVE_PATH1,
