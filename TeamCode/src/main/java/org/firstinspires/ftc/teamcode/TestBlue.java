@@ -38,7 +38,7 @@ public class TestBlue extends OpMode {
     private static final double INTAKE_PAUSE_TIME = 1.0;
     private static final int NUM_BALLS_TO_FIRE = 3;
 
-    private final Pose startPose = new Pose(57, 9, Math.toRadians(270));
+    private final Pose startPose = new Pose(21, 122, Math.toRadians(-44));
     private final Pose path1Pose = new Pose(60, 99, Math.toRadians(-31));
     private final Pose path2Pose = new Pose(44, 84, Math.toRadians(180));
     private final Pose path3Pose = new Pose(15, 84, Math.toRadians(180));
@@ -152,7 +152,7 @@ public class TestBlue extends OpMode {
                     // Ball 2: Pulse (1.4s), Pause (1.0s) -> End at 5.8s (3.4 + 1.4 + 1.0 = 5.8s)
                     double timeForBall0 = INTAKE_PULSE_TIME + INTAKE_PAUSE_TIME; // 0.4 + 1.0 = 1.4s
                     double timeForBall1 = INTAKE_PULSE_TIME + INTAKE_PAUSE_TIME; // 0.4 + 1.0 = 1.4s
-                    double shooterAccelTime = 1.0; // Additional 1 second for shooter acceleration
+                    double shooterAccelTime = 1.0; // Additional 1 second for shooter acceleration?/
 
                     // Check if we have completed each specific pulse/pause cycle based on the timeline
                     if (pulsesCompleted == 0) {
