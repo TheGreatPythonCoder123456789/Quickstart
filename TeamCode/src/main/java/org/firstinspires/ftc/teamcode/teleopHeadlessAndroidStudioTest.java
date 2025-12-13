@@ -1,6 +1,4 @@
 package org.firstinspires.ftc.teamcode;
-//for positioning robot make it on red tape by alligning it with
-// the right and left ends of the C channels (end of the C channels)
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -9,8 +7,8 @@ import com.qualcomm.robotcore.hardware.IMU;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystem;
 
-@TeleOp(name="OFFICIAL_headlessAndroid", group="TeleOp")
-public class teleopHeadlessAndroidStudio extends LinearOpMode {
+@TeleOp(name="TEST_headlessAndroid", group="TeleOp")
+public class teleopHeadlessAndroidStudioTest extends LinearOpMode {
     private DcMotor frontLeft;
     private DcMotor frontRight;
     private DcMotor backLeft;
@@ -18,8 +16,22 @@ public class teleopHeadlessAndroidStudio extends LinearOpMode {
     private DcMotor intakeTop;
     private IMU imu;
 
-    // Shooter subsystem
     private ShooterSubsystem shooter;
+
+    // PID tuning variables (per motor)
+    private double currentPLeft = 5.4;
+    private double currentDLeft = 0.7;
+    private double currentPRight = 5.4;
+    private double currentDRight = 0.7;
+
+    private final double targetRPM = 2100;
+    private final double targetTicksPerSec = (targetRPM / 60.0) * 28; // ≈980
+
+    private boolean dpadUpPrevious = false;
+    private boolean dpadDownPrevious = false;
+    private boolean yButtonPrevious = false;
+    private boolean headlessEnabled = true;
+    private double botHeading = 0.0;
 
     @Override
     public void runOpMode() {
@@ -37,11 +49,6 @@ public class teleopHeadlessAndroidStudio extends LinearOpMode {
         }
     }
 
-    boolean dpadUpPrevious = false;
-    boolean yButtonPrevious = false;
-    boolean headlessEnabled = true;
-    double botHeading = 0.0;
-
     private void initializeHardware() {
         frontLeft = hardwareMap.get(DcMotor.class, "frontLeft");
         frontRight = hardwareMap.get(DcMotor.class, "frontRight");
@@ -57,9 +64,6 @@ public class teleopHeadlessAndroidStudio extends LinearOpMode {
         backLeft.setDirection(DcMotor.Direction.REVERSE);
         backRight.setDirection(DcMotor.Direction.FORWARD);
     }
-
-    private void shootMechLast() { }
-    private void shootfrst2Balls() { }
 
     private void runTeleop() {
         double drive = -gamepad1.left_stick_y / 1.5;
@@ -98,30 +102,50 @@ public class teleopHeadlessAndroidStudio extends LinearOpMode {
             intakeTop.setPower(0);
         }
 
-        // Shooter control using subsystem
+        // Shooter control
         if (gamepad2.right_trigger > 0) {
-            shooter.setTargetRPM(2100); // perfected target RPM
+            shooter.setTargetRPM(targetRPM);
         } else {
             shooter.stopShooter();
         }
 
-        // Use D-Pad Up for shooting sequence
+        // Live PID tuning with D-Pad (adjust both motors together)
         if (gamepad2.dpad_up && !dpadUpPrevious) {
-            shootfrst2Balls();
-            shootMechLast();
+            currentPLeft += 0.1;
+            currentPRight += 0.1;
         }
+        if (gamepad2.dpad_down && !dpadDownPrevious) {
+            currentPLeft = Math.max(0.0, currentPLeft - 0.1);
+            currentPRight = Math.max(0.0, currentPRight - 0.1);
+        }
+        if (gamepad2.dpad_right) {
+            currentDLeft += 0.1;
+            currentDRight += 0.1;
+        }
+        if (gamepad2.dpad_left) {
+            currentDLeft = Math.max(0.0, currentDLeft - 0.1);
+            currentDRight = Math.max(0.0, currentDRight - 0.1);
+        }
+
+        shooter.updatePD(currentPLeft, currentDLeft, currentPRight, currentDRight);
+
         dpadUpPrevious = gamepad2.dpad_up;
+        dpadDownPrevious = gamepad2.dpad_down;
 
         // Telemetry
-        telemetry.addData("Shooter Left Velocity", shooter.getLeftShooterVelocity());
-        telemetry.addData("Shooter Right Velocity", shooter.getRightShooterVelocity());
-        telemetry.addData("intakeTop Power", intakeTop.getPower());
-        telemetry.addData("Front Left", frontLeft.getPower());
-        telemetry.addData("Front Right", frontRight.getPower());
-        telemetry.addData("Back Left", backLeft.getPower());
-        telemetry.addData("Back Right", backRight.getPower());
-        telemetry.addData("IMU Heading (Radians)", botHeading);
-        telemetry.addData("Headless Mode", headlessEnabled ? "ON" : "OFF");
-        telemetry.addData("Y Button State", gamepad1.y);
+        double leftVel = shooter.getLeftShooterVelocity();
+        double rightVel = shooter.getRightShooterVelocity();
+        double avgVel = (leftVel + rightVel) / 2.0;
+        double error = targetTicksPerSec - avgVel;
+
+        telemetry.addData("Shooter Left Velocity", leftVel);
+        telemetry.addData("Shooter Right Velocity", rightVel);
+        telemetry.addData("Shooter Avg Velocity", avgVel);
+        telemetry.addData("Target Ticks/sec", targetTicksPerSec);
+        telemetry.addData("Velocity Error", error);
+        telemetry.addData("Shooter Left P", currentPLeft);
+        telemetry.addData("Shooter Left D", currentDLeft);
+        telemetry.addData("Shooter Right P", currentPRight);
+        telemetry.addData("Shooter Right D", currentDRight);
     }
 }

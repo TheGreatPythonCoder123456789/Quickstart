@@ -10,15 +10,21 @@ public class ShooterSubsystem {
 
     private static final int TICKS_PER_REV = 28;
 
-    // Start with P=0, I=0, D=0 while tuning F
-    private PIDFCoefficients leftPIDF  = new PIDFCoefficients(5.0, 0.0, 0.7, 12.95); // tuned from telemetry
-    private PIDFCoefficients rightPIDF = new PIDFCoefficients(5.0, 0.0, 0.7, 12.75); // tuned from telemetry
-                                                                                                //was 12.5 make 6 if bad low
+    // Perfected baseline values
+    private double baseP = 5.4;
+    private double baseD = 0.7;
+    private double baseFLeft = 12.95;
+    private double baseFRight = 12.75;
+
     public ShooterSubsystem(HardwareMap hardwareMap) {
         shootLeft  = hardwareMap.get(DcMotorEx.class, "shootLeft");
         shootRight = hardwareMap.get(DcMotorEx.class, "shootRight");
 
         shootRight.setDirection(DcMotorEx.Direction.REVERSE);
+
+        // Apply perfected PIDF
+        PIDFCoefficients leftPIDF  = new PIDFCoefficients(baseP, 0.0, baseD, baseFLeft);
+        PIDFCoefficients rightPIDF = new PIDFCoefficients(baseP, 0.0, baseD, baseFRight);
 
         shootLeft.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, leftPIDF);
         shootRight.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, rightPIDF);
@@ -47,18 +53,11 @@ public class ShooterSubsystem {
         return shootRight.getVelocity();
     }
 
-    // Helper to adjust only F terms during tuning
-    public void setFeedforward(double fLeft, double fRight) {
-        leftPIDF  = new PIDFCoefficients(leftPIDF.p, leftPIDF.i, leftPIDF.d, fLeft);
-        rightPIDF = new PIDFCoefficients(rightPIDF.p, rightPIDF.i, rightPIDF.d, fRight);
-        shootLeft.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, leftPIDF);
-        shootRight.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, rightPIDF);
-    }
+    // Re-added: Update P/D live for TeleOp test
+    public void updatePD(double pLeft, double dLeft, double pRight, double dRight) {
+        PIDFCoefficients leftPIDF  = new PIDFCoefficients(pLeft, 0.0, dLeft, baseFLeft);
+        PIDFCoefficients rightPIDF = new PIDFCoefficients(pRight, 0.0, dRight, baseFRight);
 
-    // Optional: set full PIDF if needed later
-    public void setPIDF(double p, double i, double d, double fLeft, double fRight) {
-        leftPIDF  = new PIDFCoefficients(p, i, d, fLeft);
-        rightPIDF = new PIDFCoefficients(p, i, d, fRight);
         shootLeft.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, leftPIDF);
         shootRight.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, rightPIDF);
     }
