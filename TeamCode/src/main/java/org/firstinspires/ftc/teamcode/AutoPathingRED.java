@@ -19,6 +19,17 @@ public class AutoPathingRED extends OpMode {
         FIRE_BALLS,
         DRIVE_PATH2,
         DRIVE_PATH3,
+        DRIVE_PATH4,
+        FIRE_BALLS1,
+        DRIVE_PATH5,
+        DRIVE_PATH6,
+        DRIVE_PATH7,
+        FIRE_BALLS2,
+        DRIVE_PATH8,
+        DRIVE_PATH9,
+        DRIVE_PATH10,
+        FIRE_BALLS3,
+        DRIVE_PATH11,
         DONE
     }
 
@@ -44,7 +55,7 @@ public class AutoPathingRED extends OpMode {
     private final Pose path11Pose = new Pose(109,71,Math.toRadians(0));
 
 
-    private PathChain path1, path2, path3;
+    private PathChain path1, path2, path3, path4, path5, path6, path7, path8, path9, path10, path11;
 
     private AutoState currentState;
     private boolean pathStarted = false;
@@ -86,6 +97,46 @@ public class AutoPathingRED extends OpMode {
         path3 = follower.pathBuilder()
                 .addPath(new BezierLine(path2Pose, path3Pose))
                 .setLinearHeadingInterpolation(path2Pose.getHeading(), path3Pose.getHeading())
+                .build();
+
+        path4 = follower.pathBuilder()
+                .addPath(new BezierLine(path3Pose, path4Pose))
+                .setLinearHeadingInterpolation(path3Pose.getHeading(), path4Pose.getHeading())
+                .build();
+
+        path5 = follower.pathBuilder()
+                .addPath(new BezierLine(path4Pose, path5Pose))
+                .setLinearHeadingInterpolation(path4Pose.getHeading(), path5Pose.getHeading())
+                .build();
+
+        path6 = follower.pathBuilder()
+                .addPath(new BezierLine(path5Pose, path6Pose))
+                .setLinearHeadingInterpolation(path5Pose.getHeading(), path6Pose.getHeading())
+                .build();
+
+        path7 = follower.pathBuilder()
+                .addPath(new BezierLine(path6Pose, path7Pose))
+                .setLinearHeadingInterpolation(path6Pose.getHeading(), path7Pose.getHeading())
+                .build();
+
+        path8 = follower.pathBuilder()
+                .addPath(new BezierLine(path7Pose, path8Pose))
+                .setLinearHeadingInterpolation(path7Pose.getHeading(), path8Pose.getHeading())
+                .build();
+
+        path9 = follower.pathBuilder()
+                .addPath(new BezierLine(path8Pose, path9Pose))
+                .setLinearHeadingInterpolation(path8Pose.getHeading(), path9Pose.getHeading())
+                .build();
+
+        path10 = follower.pathBuilder()
+                .addPath(new BezierLine(path9Pose, path10Pose))
+                .setLinearHeadingInterpolation(path9Pose.getHeading(), path10Pose.getHeading())
+                .build();
+
+        path11 = follower.pathBuilder()
+                .addPath(new BezierLine(path10Pose, path11Pose))
+                .setLinearHeadingInterpolation(path10Pose.getHeading(), path11Pose.getHeading())
                 .build();
     }
 
@@ -167,6 +218,183 @@ public class AutoPathingRED extends OpMode {
                 }
                 if (!follower.isBusy()) {
                     intakeTop.setPower(0);
+                    currentState = AutoState.DONE;
+                }
+                break;
+
+            case DRIVE_PATH4:
+                if (!pathStarted) {
+                    follower.followPath(path4, true);
+                    pathStarted = true;
+                }
+                if (!follower.isBusy()) {
+                    currentState = AutoState.DONE;
+                }
+                break;
+
+            case FIRE_BALLS1:
+                try {
+                    // Ball 1
+                    intakeTop.setPower(-1.0);
+                    sleep(500);
+                    intakeTop.setPower(0);
+                    sleep(500);
+
+                    // Ball 2
+                    intakeTop.setPower(-1.0);
+                    sleep(800);
+                    intakeTop.setPower(0);
+                    sleep(500);
+
+                    // Ball 3
+                    intakeTop.setPower(-1.0);
+                    sleep(1000);
+                    intakeTop.setPower(0);
+
+                    // Shooter continues for 300 ms after last ball
+                    sleep(300);
+                    shooter.stopShooter();
+                    intakeTop.setPower(0);
+
+                } catch (Exception e) {
+                    telemetry.addLine("Error in shooting sequence: " + e.getMessage());
+                }
+
+                currentState = AutoState.DRIVE_PATH4;
+                break;
+
+            case DRIVE_PATH5:
+                if (!pathStarted) {
+                    follower.followPath(path5, true);
+                    pathStarted = true;
+                }
+                if (!follower.isBusy()) {
+                    currentState = AutoState.DONE;
+                }
+                break;
+
+            case DRIVE_PATH6:
+                if (!pathStarted) {
+                    follower.followPath(path6, true);
+                    pathStarted = true;
+                    intakeTop.setPower(-1.0); // pickup
+                }
+                if (!follower.isBusy()) {
+                    intakeTop.setPower(0);
+                    currentState = AutoState.DONE;
+                }
+                break;
+
+            case DRIVE_PATH7:
+                if (!pathStarted) {
+                    follower.followPath(path7, true);
+                    pathStarted = true;
+                }
+                if (!follower.isBusy()) {
+                    currentState = AutoState.DONE;
+                }
+                break;
+
+            case FIRE_BALLS2:
+                try {
+                    // Ball 1
+                    intakeTop.setPower(-1.0);
+                    sleep(500);
+                    intakeTop.setPower(0);
+                    sleep(500);
+
+                    // Ball 2
+                    intakeTop.setPower(-1.0);
+                    sleep(800);
+                    intakeTop.setPower(0);
+                    sleep(500);
+
+                    // Ball 3
+                    intakeTop.setPower(-1.0);
+                    sleep(1000);
+                    intakeTop.setPower(0);
+
+                    // Shooter continues for 300 ms after last ball
+                    sleep(300);
+                    shooter.stopShooter();
+                    intakeTop.setPower(0);
+
+                } catch (Exception e) {
+                    telemetry.addLine("Error in shooting sequence: " + e.getMessage());
+                }
+
+                currentState = AutoState.DRIVE_PATH7;
+                break;
+
+            case DRIVE_PATH8:
+                if (!pathStarted) {
+                    follower.followPath(path8, true);
+                    pathStarted = true;
+                }
+                if (!follower.isBusy()) {
+                    currentState = AutoState.DONE;
+                }
+                break;
+
+            case DRIVE_PATH9:
+                if (!pathStarted) {
+                    follower.followPath(path9, true);
+                    pathStarted = true;
+                    intakeTop.setPower(-1.0); // pickup
+                }
+                if (!follower.isBusy()) {
+                    intakeTop.setPower(0);
+                    currentState = AutoState.DONE;
+                }
+                break;
+
+            case DRIVE_PATH10:
+                if (!pathStarted) {
+                    follower.followPath(path10, true);
+                    pathStarted = true;
+                }
+                if (!follower.isBusy()) {
+                    currentState = AutoState.DONE;
+                }
+                break;
+
+            case FIRE_BALLS3:
+                try {
+                    // Ball 1
+                    intakeTop.setPower(-1.0);
+                    sleep(500);
+                    intakeTop.setPower(0);
+                    sleep(500);
+
+                    // Ball 2
+                    intakeTop.setPower(-1.0);
+                    sleep(800);
+                    intakeTop.setPower(0);
+                    sleep(500);
+
+                    // Ball 3
+                    intakeTop.setPower(-1.0);
+                    sleep(1000);
+                    intakeTop.setPower(0);
+
+                    // Shooter continues for 300 ms after last ball
+                    sleep(300);
+                    shooter.stopShooter();
+                    intakeTop.setPower(0);
+
+                } catch (Exception e) {
+                    telemetry.addLine("Error in shooting sequence: " + e.getMessage());
+                }
+
+                currentState = AutoState.DRIVE_PATH10;
+                break;
+
+            case DRIVE_PATH11:
+                if (!pathStarted) {
+                    follower.followPath(path11, true);
+                    pathStarted = true;
+                }
+                if (!follower.isBusy()) {
                     currentState = AutoState.DONE;
                 }
                 break;
