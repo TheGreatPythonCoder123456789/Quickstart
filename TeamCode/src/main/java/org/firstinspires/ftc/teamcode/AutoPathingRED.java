@@ -34,6 +34,15 @@ public class AutoPathingRED extends OpMode {
     private final Pose path1Pose = new Pose(84, 99, Math.toRadians(-149));
     private final Pose path2Pose = new Pose(100, 84, Math.toRadians(0));
     private final Pose path3Pose = new Pose(129, 84, Math.toRadians(0));
+    private final Pose path4Pose = new Pose(84, 99);
+    private final Pose path5Pose = new Pose();
+    private final Pose path6Pose = new Pose();
+    private final Pose path7Pose = new Pose();
+    private final Pose path8Pose = new Pose();
+    private final Pose path9Pose = new Pose();
+    private final Pose path10Pose = new Pose();
+    private final Pose path11Pose = new Pose();
+
 
     private PathChain path1, path2, path3;
 
