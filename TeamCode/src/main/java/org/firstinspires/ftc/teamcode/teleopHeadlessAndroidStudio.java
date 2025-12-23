@@ -37,6 +37,7 @@ public class teleopHeadlessAndroidStudio extends LinearOpMode {
     boolean gateOpen = false;
 
     double botHeading = 0.0;
+    double backNum = 85;
 
     @Override
     public void runOpMode() {
@@ -69,10 +70,25 @@ public class teleopHeadlessAndroidStudio extends LinearOpMode {
         frontRight.setDirection(DcMotor.Direction.FORWARD);
         backLeft.setDirection(DcMotor.Direction.REVERSE);
         backRight.setDirection(DcMotor.Direction.FORWARD);
+        gate.setPosition(1.0);
     }
 
     private void shootMechLast() { }
     private void shootfrst2Balls() { }
+    private void servoSetter() {
+        double currentPos = gate.getPosition();   //servo name
+        double degreesBack = backNum;
+        double totalDegrees = 1800.0;
+
+        double positionChange = degreesBack / totalDegrees;
+        double newPos = currentPos - positionChange;
+
+        // Clamp to valid range
+        newPos = Math.max(0.0, Math.min(1.0, newPos));
+
+        gate.setPosition(newPos);
+    }
+
 
     private void runTeleop() {
 
@@ -135,7 +151,7 @@ public class teleopHeadlessAndroidStudio extends LinearOpMode {
         }
 
         if (bPressed) {
-            gate.setPosition(0.7);   // open
+            servoSetter();   // open
             gateOpen = true;
         }
 
@@ -153,7 +169,8 @@ public class teleopHeadlessAndroidStudio extends LinearOpMode {
         telemetry.addData("Shooter Left Velocity", shooter.getLeftShooterVelocity());
         telemetry.addData("Shooter Right Velocity", shooter.getRightShooterVelocity());
         telemetry.addData("Intake Power", intakeTop.getPower());
-        telemetry.addData("Gate Position", gateOpen ? "OPEN (0.7)" : "CLOSED (1.0)");
+        telemetry.addData("Gate Position", gateOpen ? "OPEN" : "CLOSED");
+        telemetry.addData("Gate Position: ", gate.getPosition());
         telemetry.addData("IMU Heading (Radians)", botHeading);
         telemetry.addData("Headless Mode", headlessEnabled ? "ON" : "OFF");
     }
