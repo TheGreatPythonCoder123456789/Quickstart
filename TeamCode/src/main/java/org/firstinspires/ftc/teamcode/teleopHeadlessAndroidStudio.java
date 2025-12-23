@@ -27,8 +27,11 @@ public class teleopHeadlessAndroidStudio extends LinearOpMode {
 
     // Button state tracking
     boolean dpadUpPrevious = false;
-    boolean yButtonPrevious = false;      // for gamepad1.y (headless)
-    boolean gateYPrevious = false;        // for gamepad2.y (gate toggle)
+    boolean yButtonPrevious = false;  // for headless toggle
+
+    // NEW: gate button edge detection
+    boolean xPrev = false;
+    boolean bPrev = false;
 
     boolean headlessEnabled = true;
     boolean gateOpen = false;
@@ -122,17 +125,22 @@ public class teleopHeadlessAndroidStudio extends LinearOpMode {
             shooter.stopShooter();
         }
 
-        // ------------------ GATE TOGGLE (GAMEPAD 2 Y) ------------------
-        if (gamepad2.y && !gateYPrevious) {
-            gateOpen = !gateOpen;
+        // ------------------ GATE TOGGLE (GAMEPAD 1 X / B) ------------------
+        boolean xPressed = gamepad2.x && !xPrev;   // rising edge
+        boolean bPressed = gamepad2.b && !bPrev;   // rising edge
 
-            if (gateOpen) {
-                gate.setPosition(1.0);
-            } else {
-                gate.setPosition(0);
-            }
+        if (xPressed) {
+            gate.setPosition(1.0);   // close
+            gateOpen = false;
         }
-        gateYPrevious = gamepad2.y;
+
+        if (bPressed) {
+            gate.setPosition(0.7);   // open
+            gateOpen = true;
+        }
+
+        xPrev = gamepad2.x;
+        bPrev = gamepad2.b;
 
         // ------------------ SHOOTING SEQUENCE ------------------
         if (gamepad2.dpad_up && !dpadUpPrevious) {
@@ -145,7 +153,7 @@ public class teleopHeadlessAndroidStudio extends LinearOpMode {
         telemetry.addData("Shooter Left Velocity", shooter.getLeftShooterVelocity());
         telemetry.addData("Shooter Right Velocity", shooter.getRightShooterVelocity());
         telemetry.addData("Intake Power", intakeTop.getPower());
-        telemetry.addData("Gate Position", gateOpen ? "OPEN (1.0)" : "CLOSED (0.0)");
+        telemetry.addData("Gate Position", gateOpen ? "OPEN (0.7)" : "CLOSED (1.0)");
         telemetry.addData("IMU Heading (Radians)", botHeading);
         telemetry.addData("Headless Mode", headlessEnabled ? "ON" : "OFF");
     }
