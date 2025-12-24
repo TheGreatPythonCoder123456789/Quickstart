@@ -81,8 +81,35 @@ public class teleopHeadlessAndroidStudio extends LinearOpMode {
         gate.setPosition(1.0);
     }
 
-    private void shootMechLast() { }
-    private void shootfrst2Balls() { }
+    // ---------------------------------------------------------
+    //  COMBINED SHOOTING FUNCTION
+    // ---------------------------------------------------------
+    private void shootAllBalls() {
+
+        // Spin up shooter
+        shooter.setTargetRPM(2100);
+        sleep(1500);
+
+        // Ball 1
+        intakeTop.setPower(1.0);
+        sleep(500);
+        intakeTop.setPower(0);
+        sleep(500);
+
+        // Ball 2
+        intakeTop.setPower(1.0);
+        sleep(900);
+        intakeTop.setPower(0);
+        sleep(500);
+
+        // Ball 3
+        intakeTop.setPower(1.0);
+        sleep(1500);
+
+        // Stop everything
+        intakeTop.setPower(0);
+        shooter.stopShooter();
+    }
 
     private void servoSetter() {
         double currentPos = gate.getPosition();
@@ -181,8 +208,7 @@ public class teleopHeadlessAndroidStudio extends LinearOpMode {
 
         // ------------------ SHOOTING SEQUENCE ------------------
         if (gamepad2.dpad_up && !dpadUpPrevious) {
-            shootfrst2Balls();
-            shootMechLast();
+            shootAllBalls();
         }
         dpadUpPrevious = gamepad2.dpad_up;
 
