@@ -148,9 +148,9 @@ public class teleopHeadlessAndroidStudio extends LinearOpMode {
 
         // ------------------ INTAKE ------------------
         if (gamepad2.left_bumper) {
-            intakeTop.setPower(-1.0);
+            intakeTop.setPower(-1.0); //Balls OUT
         } else if (gamepad2.right_bumper) {
-            intakeTop.setPower(1.0);
+            intakeTop.setPower(1.0); // balls IN
         } else {
             intakeTop.setPower(0);
         }
