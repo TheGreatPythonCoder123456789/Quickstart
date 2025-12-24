@@ -29,15 +29,22 @@ public class teleopHeadlessAndroidStudio extends LinearOpMode {
     boolean dpadUpPrevious = false;
     boolean yButtonPrevious = false;  // for headless toggle
 
-    // NEW: gate button edge detection
+    // Gate button edge detection
     boolean xPrev = false;
     boolean bPrev = false;
+
+    // Speed mode button edge detection
+    boolean lbPrev = false;
+    boolean rbPrev = false;
 
     boolean headlessEnabled = true;
     boolean gateOpen = false;
 
     double botHeading = 0.0;
     double backNum = 85;
+
+    // NEW: speed divisor (default slow mode)
+    double speedDivisor = 1.8;
 
     @Override
     public void runOpMode() {
@@ -70,38 +77,52 @@ public class teleopHeadlessAndroidStudio extends LinearOpMode {
         frontRight.setDirection(DcMotor.Direction.FORWARD);
         backLeft.setDirection(DcMotor.Direction.REVERSE);
         backRight.setDirection(DcMotor.Direction.FORWARD);
+
         gate.setPosition(1.0);
     }
 
     private void shootMechLast() { }
     private void shootfrst2Balls() { }
+
     private void servoSetter() {
-        double currentPos = gate.getPosition();   //servo name
+        double currentPos = gate.getPosition();
         double degreesBack = backNum;
         double totalDegrees = 1800.0;
 
         double positionChange = degreesBack / totalDegrees;
         double newPos = currentPos - positionChange;
 
-        // Clamp to valid range
         newPos = Math.max(0.0, Math.min(1.0, newPos));
-
         gate.setPosition(newPos);
     }
 
-
     private void runTeleop() {
 
+        // ------------------ SPEED MODE TOGGLE ------------------
+        boolean lbPressed = gamepad1.left_bumper && !lbPrev;
+        boolean rbPressed = gamepad1.right_bumper && !rbPrev;
+
+        if (rbPressed) {
+            speedDivisor = 1.0;   // full speed
+        }
+
+        if (lbPressed) {
+            speedDivisor = 1.8;   // slow mode
+        }
+
+        lbPrev = gamepad1.left_bumper;
+        rbPrev = gamepad1.right_bumper;
+
         // ------------------ DRIVETRAIN ------------------
-        double drive = -gamepad1.left_stick_y / 1.5;
-        double strafe = gamepad1.left_stick_x / 1.5;
-        double turn  = gamepad1.right_stick_x;
+        double drive  = -gamepad1.left_stick_y / speedDivisor;
+        double strafe =  gamepad1.left_stick_x / speedDivisor;
+        double turn   =  gamepad1.right_stick_x;
 
         botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
         if (gamepad1.a) imu.resetYaw();
 
-        // Toggle headless mode on gamepad1.y
+        // Toggle headless mode
         if (gamepad1.y && !yButtonPrevious) {
             headlessEnabled = !headlessEnabled;
         }
@@ -141,9 +162,9 @@ public class teleopHeadlessAndroidStudio extends LinearOpMode {
             shooter.stopShooter();
         }
 
-        // ------------------ GATE TOGGLE (GAMEPAD 1 X / B) ------------------
-        boolean xPressed = gamepad2.x && !xPrev;   // rising edge
-        boolean bPressed = gamepad2.b && !bPrev;   // rising edge
+        // ------------------ GATE TOGGLE ------------------
+        boolean xPressed = gamepad2.x && !xPrev;
+        boolean bPressed = gamepad2.b && !bPrev;
 
         if (xPressed) {
             gate.setPosition(1.0);   // close
@@ -151,7 +172,7 @@ public class teleopHeadlessAndroidStudio extends LinearOpMode {
         }
 
         if (bPressed) {
-            servoSetter();   // open
+            servoSetter();           // open
             gateOpen = true;
         }
 
@@ -170,8 +191,9 @@ public class teleopHeadlessAndroidStudio extends LinearOpMode {
         telemetry.addData("Shooter Right Velocity", shooter.getRightShooterVelocity());
         telemetry.addData("Intake Power", intakeTop.getPower());
         telemetry.addData("Gate Position", gateOpen ? "OPEN" : "CLOSED");
-        telemetry.addData("Gate Position: ", gate.getPosition());
+        telemetry.addData("Gate Raw Position", gate.getPosition());
         telemetry.addData("IMU Heading (Radians)", botHeading);
         telemetry.addData("Headless Mode", headlessEnabled ? "ON" : "OFF");
+        telemetry.addData("Drive Speed Mode", speedDivisor == 1.0 ? "FULL" : "SLOW");
     }
 }
