@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.IMU;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystem;
 
-@TeleOp(name="TEST_headlessAndroid", group="TeleOp")
+@TeleOp(name="TEST_headlessAndroid_PID_SHOOTER", group="TeleOp")
 public class teleopHeadlessAndroidStudioTest extends LinearOpMode {
     private DcMotor frontLeft;
     private DcMotor frontRight;
