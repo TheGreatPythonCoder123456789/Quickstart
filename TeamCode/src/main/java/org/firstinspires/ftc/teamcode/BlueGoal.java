@@ -1,5 +1,5 @@
 package org.firstinspires.ftc.teamcode;
-
+//this one shoots preloaded and picks up first row of balls
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
