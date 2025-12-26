@@ -41,7 +41,7 @@ public class teleopHeadlessAndroidStudio extends LinearOpMode {
     boolean gateOpen = false;
 
     double botHeading = 0.0;
-    double backNum = 85;
+    double backNum = 126;
 
     // NEW: speed divisor (default slow mode)
     double speedDivisor = 1.8;
