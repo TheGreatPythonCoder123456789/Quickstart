@@ -1,0 +1,26 @@
+UPDATED on 12/25/2025 at 9:57 PM.
+
+pedroPathing:
+    -constants
+    -Pose debugger
+    -tuning OpMode
+
+subsystems:
+    -shooter subsystem
+
+Autonomous's:
+    2 Groups {group 1: shoot rows of balls (SR)  / group 2: shoot preloaded and use human player (HP)}
+
+    group 1 status COMPLETE (but TEST TES TEST): AutoPathing Red; AutoPathing Blue; BlueGoal; RedGoal;
+    group 2 status: !started
+
+    (double for groups in starting positions) {
+        -AutoPathing Blue
+        -AutoPathing Red
+        -Blue Goal
+        -Red Goal
+    }
+
+Teleop's:
+   -Official Teleop (teleopHeadlessAndroidStudio)
+   -Tuning shooter PID (teleopHeadlessPIDshootingTest)

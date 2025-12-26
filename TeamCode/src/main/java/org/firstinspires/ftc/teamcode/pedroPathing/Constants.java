@@ -14,8 +14,9 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class Constants {
 
+    // ---------------- DRIVE CONSTANTS ----------------
     public static MecanumConstants driveConstants = new MecanumConstants()
-            .maxPower(.96)
+            .maxPower(0.50)
             .rightFrontMotorName("frontRight")
             .rightRearMotorName("backRight")
             .leftRearMotorName("backLeft")
@@ -27,10 +28,11 @@ public class Constants {
             .xVelocity(63.09182251326858)
             .yVelocity(51.26808593315976);
 
+    // ---------------- LOCALIZER CONSTANTS ----------------
     public static ThreeWheelConstants localizerConstants = new ThreeWheelConstants()
             .forwardTicksToInches(0.0019742365894729686)
             .strafeTicksToInches(0.0019917627182528697)
-            .turnTicksToInches(.002025566753320759)
+            .turnTicksToInches(0.002025566753320759)
             .leftPodY(8)
             .rightPodY(-8)
             .strafePodX(0)
@@ -41,18 +43,51 @@ public class Constants {
             .rightEncoderDirection(Encoder.REVERSE)
             .strafeEncoderDirection(Encoder.FORWARD);
 
+    // ---------------- FOLLOWER CONSTANTS (Balanced) ----------------
     public static FollowerConstants followerConstants = new FollowerConstants()
-            .mass(15)
-            .forwardZeroPowerAcceleration(-38.72960408654546)
-            .lateralZeroPowerAcceleration(-55.23187564761812)
-            .translationalPIDFCoefficients(new PIDFCoefficients(0.2, 0, 0.02, 0.015))
-            .headingPIDFCoefficients(new PIDFCoefficients(1, 0, 0.1, 0.015))
-            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.025,0.0,0.001,0.6,0.01))
-            .centripetalScaling(0.005);
+            .mass(10)   // updated from 15 → 10 kg
 
+            // Balanced zero-power accelerations
+            .forwardZeroPowerAcceleration(-26)
+            .lateralZeroPowerAcceleration(-34)
+
+            // Balanced translational PIDF
+            .translationalPIDFCoefficients(new PIDFCoefficients(
+                    0.12,   // P
+                    0.0,    // I
+                    0.015,  // D
+                    0.015   // F
+            ))
+
+            // Balanced heading PIDF
+            .headingPIDFCoefficients(new PIDFCoefficients(
+                    0.55,   // P
+                    0.0,    // I
+                    0.05,   // D
+                    0.015   // F
+            ))
+
+            // Drive PIDF (kept mild)
+            .drivePIDFCoefficients(new FilteredPIDFCoefficients(
+                    0.02,   // P
+                    0.0,    // I
+                    0.001,  // D
+                    0.6,    // F
+                    0.01    // filter
+            ))
+
+            .centripetalScaling(0.0045);
+
+    // ---------------- PATH CONSTRAINTS (Balanced) ----------------
     public static PathConstraints pathConstraints =
-            new PathConstraints(0.92, 15, 0.80, 0.80);
+            new PathConstraints(
+                    0.90,   // maxVel
+                    12,     // maxAccel
+                    0.75,   // maxAngVel
+                    0.75    // maxAngAccel
+            );
 
+    // ---------------- FOLLOWER BUILDER ----------------
     public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)
                 .threeWheelLocalizer(localizerConstants)

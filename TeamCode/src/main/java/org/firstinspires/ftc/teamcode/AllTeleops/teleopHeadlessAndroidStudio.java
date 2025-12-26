@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.AllTeleops;
 
 //for positioning robot make it on red tape by alligning it with
 // the right and left ends of the C channels (end of the C channels)
