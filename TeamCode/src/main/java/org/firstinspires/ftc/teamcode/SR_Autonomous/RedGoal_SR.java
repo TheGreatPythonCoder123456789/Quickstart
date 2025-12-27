@@ -432,109 +432,109 @@ public class RedGoal_SR extends LinearOpMode {
     // -------- BUILD PATHS --------
     private void buildPaths() {
 
-        // Path 1A: start → midShootPose (diagonal)
+        // Path 1A: start (-136) -> midShoot (-145.3) → LINEAR
         path1A = follower.pathBuilder()
                 .addPath(new BezierLine(startPose, midShootPose))
                 .setLinearHeadingInterpolation(startPose.getHeading(), midShootPose.getHeading())
                 .build();
 
-        // Path 1C: midShoot → shootPose
+        // Path 1C: midShoot (-145.3) -> shootPose (-145.3) → CONSTANT
         path1C = follower.pathBuilder()
                 .addPath(new BezierLine(midShootPose, shootPose))
-                .setLinearHeadingInterpolation(midShootPose.getHeading(), shootPose.getHeading())
+                .setConstantHeadingInterpolation(midShootPose.getHeading())
                 .build();
 
-        // Path 2: shoot → path2
+        // Path 2: shoot (-145.3) -> path2 (0) → LINEAR
         path2 = follower.pathBuilder()
                 .addPath(new BezierLine(shootPose, path2Pose))
                 .setLinearHeadingInterpolation(shootPose.getHeading(), path2Pose.getHeading())
                 .build();
 
-        // Path 3: path2 → path3
+        // Path 3: path2 (0) -> path3 (0) → CONSTANT
         path3 = follower.pathBuilder()
                 .addPath(new BezierLine(path2Pose, path3Pose))
-                .setLinearHeadingInterpolation(path2Pose.getHeading(), path3Pose.getHeading())
+                .setConstantHeadingInterpolation(path2Pose.getHeading())
                 .build();
 
-        // Path 4A: path3 → preShoot
+        // Path 4A: path3 (0) -> preShoot (-145.3) → LINEAR
         path4A = follower.pathBuilder()
                 .addPath(new BezierLine(path3Pose, preShootPose))
                 .setLinearHeadingInterpolation(path3Pose.getHeading(), preShootPose.getHeading())
                 .build();
 
-        // Path 4B: preShoot → midShoot
+        // Path 4B: preShoot (-145.3) -> midShoot (-145.3) → CONSTANT
         path4B = follower.pathBuilder()
                 .addPath(new BezierLine(preShootPose, midShootPose))
-                .setLinearHeadingInterpolation(preShootPose.getHeading(), midShootPose.getHeading())
+                .setConstantHeadingInterpolation(preShootPose.getHeading())
                 .build();
 
-        // Path 4C: midShoot → shootPose
+        // Path 4C: midShoot (-145.3) -> shootPose (-145.3) → CONSTANT
         path4C = follower.pathBuilder()
                 .addPath(new BezierLine(midShootPose, shootPose))
-                .setLinearHeadingInterpolation(midShootPose.getHeading(), shootPose.getHeading())
+                .setConstantHeadingInterpolation(midShootPose.getHeading())
                 .build();
 
-        // Path 5: shoot → path5
+        // Path 5: shoot (-145.3) -> path5 (0) → LINEAR
         path5 = follower.pathBuilder()
                 .addPath(new BezierLine(shootPose, path5Pose))
                 .setLinearHeadingInterpolation(shootPose.getHeading(), path5Pose.getHeading())
                 .build();
 
-        // Path 6: path5 → path6
+        // Path 6: path5 (0) -> path6 (0) → CONSTANT
         path6 = follower.pathBuilder()
                 .addPath(new BezierLine(path5Pose, path6Pose))
-                .setLinearHeadingInterpolation(path5Pose.getHeading(), path6Pose.getHeading())
+                .setConstantHeadingInterpolation(path5Pose.getHeading())
                 .build();
 
-        // Path 7A: path6 → preShoot
+        // Path 7A: path6 (0) -> preShoot (-145.3) → LINEAR
         path7A = follower.pathBuilder()
                 .addPath(new BezierLine(path6Pose, preShootPose))
                 .setLinearHeadingInterpolation(path6Pose.getHeading(), preShootPose.getHeading())
                 .build();
 
-        // Path 7B: preShoot → midShoot
+        // Path 7B: preShoot (-145.3) -> midShoot (-145.3) → CONSTANT
         path7B = follower.pathBuilder()
                 .addPath(new BezierLine(preShootPose, midShootPose))
-                .setLinearHeadingInterpolation(preShootPose.getHeading(), midShootPose.getHeading())
+                .setConstantHeadingInterpolation(preShootPose.getHeading())
                 .build();
 
-        // Path 7C: midShoot → shootPose
+        // Path 7C: midShoot (-145.3) -> shootPose (-145.3) → CONSTANT
         path7C = follower.pathBuilder()
                 .addPath(new BezierLine(midShootPose, shootPose))
-                .setLinearHeadingInterpolation(midShootPose.getHeading(), shootPose.getHeading())
+                .setConstantHeadingInterpolation(midShootPose.getHeading())
                 .build();
 
-        // Path 8: shoot → path8
+        // Path 8: shoot (-145.3) -> path8 (0) → LINEAR
         path8 = follower.pathBuilder()
                 .addPath(new BezierLine(shootPose, path8Pose))
                 .setLinearHeadingInterpolation(shootPose.getHeading(), path8Pose.getHeading())
                 .build();
 
-        // Path 9: path8 → path9
+        // Path 9: path8 (0) -> path9 (0) → CONSTANT
         path9 = follower.pathBuilder()
                 .addPath(new BezierLine(path8Pose, path9Pose))
-                .setLinearHeadingInterpolation(path8Pose.getHeading(), path9Pose.getHeading())
+                .setConstantHeadingInterpolation(path8Pose.getHeading())
                 .build();
 
-        // Path 10A: path9 → preShoot
+        // Path 10A: path9 (0) -> preShoot (-145.3) → LINEAR
         path10A = follower.pathBuilder()
                 .addPath(new BezierLine(path9Pose, preShootPose))
                 .setLinearHeadingInterpolation(path9Pose.getHeading(), preShootPose.getHeading())
                 .build();
 
-        // Path 10B: preShoot → midShoot
+        // Path 10B: preShoot (-145.3) -> midShoot (-145.3) → CONSTANT
         path10B = follower.pathBuilder()
                 .addPath(new BezierLine(preShootPose, midShootPose))
-                .setLinearHeadingInterpolation(preShootPose.getHeading(), midShootPose.getHeading())
+                .setConstantHeadingInterpolation(preShootPose.getHeading())
                 .build();
 
-        // Path 10C: midShoot → shootPose
+        // Path 10C: midShoot (-145.3) -> shootPose (-145.3) → CONSTANT
         path10C = follower.pathBuilder()
                 .addPath(new BezierLine(midShootPose, shootPose))
-                .setLinearHeadingInterpolation(midShootPose.getHeading(), shootPose.getHeading())
+                .setConstantHeadingInterpolation(midShootPose.getHeading())
                 .build();
 
-        // Path 11: shoot → path11
+        // Path 11: shoot (-145.3) -> path11 (0) → LINEAR
         path11 = follower.pathBuilder()
                 .addPath(new BezierLine(shootPose, path11Pose))
                 .setLinearHeadingInterpolation(shootPose.getHeading(), path11Pose.getHeading())
