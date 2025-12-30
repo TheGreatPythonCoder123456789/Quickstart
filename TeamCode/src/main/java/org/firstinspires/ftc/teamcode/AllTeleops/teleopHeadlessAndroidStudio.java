@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.AllTeleops;
 
-//for positioning robot make it on red tape by alligning it with
+//for positioning robot make it on red tape by aligning it with
 // the right and left ends of the C channels (end of the C channels)
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -45,6 +45,10 @@ public class teleopHeadlessAndroidStudio extends LinearOpMode {
 
     // NEW: speed divisor (default slow mode)
     double speedDivisor = 1.8;
+
+    // Intake slow mode toggle
+    boolean intakeSlowMode = false;
+    boolean dpadDownPrev = false;
 
     @Override
     public void runOpMode() {
@@ -91,20 +95,26 @@ public class teleopHeadlessAndroidStudio extends LinearOpMode {
         sleep(1500);
 
         // Ball 1
-        intakeTop.setPower(1.0);
-        sleep(500);
+        intakeTop.setPower(-1.0);
+        sleep(300);
+        intakeTop.setPower(0.5);
+        sleep(700);
+
         intakeTop.setPower(0);
-        sleep(500);
+        sleep(300);
 
         // Ball 2
-        intakeTop.setPower(1.0);
-        sleep(900);
-        intakeTop.setPower(0);
+        intakeTop.setPower(-1.0);
         sleep(500);
+        intakeTop.setPower(0.5);
+        sleep(700);
+
+        intakeTop.setPower(0);
+        sleep(300);
 
         // Ball 3
-        intakeTop.setPower(1.0);
-        sleep(1500);
+        intakeTop.setPower(-1.0);
+        sleep(800);
 
         // Stop everything
         intakeTop.setPower(0);
@@ -173,18 +183,25 @@ public class teleopHeadlessAndroidStudio extends LinearOpMode {
         backLeft.setPower(backLeftPower);
         backRight.setPower(backRightPower);
 
-        // ------------------ INTAKE ------------------
-        if (gamepad2.left_bumper) {
-            intakeTop.setPower(-1.0); //Balls OUT
-        } else if (gamepad2.right_bumper) {
-            intakeTop.setPower(1.0); // balls IN
-        } else {
-            intakeTop.setPower(0);
+        // ------------------ INTAKE SLOW MODE TOGGLE ------------------
+        boolean dpadDownPressed = gamepad2.dpad_down && !dpadDownPrev;
+        if (dpadDownPressed) {
+            intakeSlowMode = !intakeSlowMode; // toggle slow mode
         }
+        dpadDownPrev = gamepad2.dpad_down;
+
+        // ------------------ INTAKE ------------------
+        double intakePower = 0.0;
+        if (gamepad2.left_bumper) {
+            intakePower = intakeSlowMode ? -0.5 : -1.0; // Balls IN
+        } else if (gamepad2.right_bumper) {
+            intakePower = intakeSlowMode ? 0.5 : 1.0;   // Balls OUT
+        }
+        intakeTop.setPower(intakePower);
 
         // ------------------ SHOOTER ------------------
         if (gamepad2.right_trigger > 0) {
-            shooter.setTargetRPM(2100);
+            shooter.setTargetRPM(2050);
         } else {
             shooter.stopShooter();
         }
@@ -216,6 +233,7 @@ public class teleopHeadlessAndroidStudio extends LinearOpMode {
         telemetry.addData("Shooter Left Velocity", shooter.getLeftShooterVelocity());
         telemetry.addData("Shooter Right Velocity", shooter.getRightShooterVelocity());
         telemetry.addData("Intake Power", intakeTop.getPower());
+        telemetry.addData("Intake Mode", intakeSlowMode ? "SLOW" : "FULL");
         telemetry.addData("Gate Position", gateOpen ? "OPEN" : "CLOSED");
         telemetry.addData("Gate Raw Position", gate.getPosition());
         telemetry.addData("IMU Heading (Radians)", botHeading);

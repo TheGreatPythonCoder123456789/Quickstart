@@ -56,9 +56,9 @@ public class AutoPathingRED_SR extends LinearOpMode {
     private final Pose startPose = new Pose(88, 9, Math.toRadians(270));
 
     // Right-side approach to shooter
-    private final Pose preShootPose = new Pose(92, 80, Math.toRadians(-145.3));   // diagonal in
-    private final Pose midShootPose = new Pose(92, 89.6, Math.toRadians(-145.3)); // vertical up
-    private final Pose shootPose = new Pose(89, 89.6, Math.toRadians(-145.3)); // final
+    private final Pose preShootPose = new Pose(92, 80, Math.toRadians(-138));   // diagonal in
+    private final Pose midShootPose = new Pose(92, 89.6, Math.toRadians(-138)); // vertical up
+    private final Pose shootPose = new Pose(89, 89.6, Math.toRadians(-138)); // final
 
     // Cycle poses
     private final Pose path2Pose = new Pose(100, 84, Math.toRadians(0));
