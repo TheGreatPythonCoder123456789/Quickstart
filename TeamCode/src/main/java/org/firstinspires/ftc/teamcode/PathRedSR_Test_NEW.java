@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystem;
@@ -19,27 +20,16 @@ import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystem;
 public class PathRedSR_Test_NEW extends LinearOpMode {
 
     private enum AutoState {
-        DRIVE_PATH1A,
-        DRIVE_PATH1B,
-        DRIVE_PATH1C,
+        DRIVE_PATH1A, DRIVE_PATH1B, DRIVE_PATH1C,
         FIRE_BALLS,
-        DRIVE_PATH2,
-        DRIVE_PATH3,
-        DRIVE_PATH4A,
-        DRIVE_PATH4B,
-        DRIVE_PATH4C,
+        DRIVE_PATH2_APPROACH, DRIVE_PATH2, DRIVE_PATH3,
+        DRIVE_PATH4A, DRIVE_PATH4B, DRIVE_PATH4C,
         FIRE_BALLS1,
-        DRIVE_PATH5,
-        DRIVE_PATH6,
-        DRIVE_PATH7A,
-        DRIVE_PATH7B,
-        DRIVE_PATH7C,
+        DRIVE_PATH5_APPROACH, DRIVE_PATH5, DRIVE_PATH6,
+        DRIVE_PATH7A, DRIVE_PATH7B, DRIVE_PATH7C,
         FIRE_BALLS2,
-        DRIVE_PATH8,
-        DRIVE_PATH9,
-        DRIVE_PATH10A,
-        DRIVE_PATH10B,
-        DRIVE_PATH10C,
+        DRIVE_PATH8_APPROACH, DRIVE_PATH8, DRIVE_PATH9,
+        DRIVE_PATH10A, DRIVE_PATH10B, DRIVE_PATH10C,
         FIRE_BALLS3,
         DRIVE_PATH11,
         DONE
@@ -53,32 +43,37 @@ public class PathRedSR_Test_NEW extends LinearOpMode {
 
     private ShooterSubsystem shooter;
 
+    // NEW: gate servo
+    private Servo gate;
+
+    // Your backNum value for servoSetter
+    private double backNum = 80;  // you can change to 90 if needed
+
     // ---------------- POSES ----------------
-
-    // Starting position
     private final Pose startPose = new Pose(88, 9, Math.toRadians(270));
-
-    // NEW SHOOTING POSES (from Pedro Pathing Visualizer)
-    private final Pose preShootPose  = new Pose(92.0, 80.0, Math.toRadians(-136.8));
-    private final Pose midShootPose  = new Pose(92.0, 89.6, Math.toRadians(-136.8));
+    private final Pose preShootPose = new Pose(92.0, 80.0, Math.toRadians(-136.8));
+    private final Pose midShootPose = new Pose(92.0, 89.6, Math.toRadians(-136.8));
     private final Pose launchingPose = new Pose(93.0, 96.0, Math.toRadians(-136.8));
 
-    // Cycle poses
-    private final Pose path2Pose  = new Pose(92, 84, Math.toRadians(0));
-    private final Pose path3Pose  = new Pose(129, 84, Math.toRadians(0));
-    private final Pose path5Pose  = new Pose(92, 60, Math.toRadians(0));
-    private final Pose path6Pose  = new Pose(135, 60, Math.toRadians(0));
-    private final Pose path8Pose  = new Pose(92, 36, Math.toRadians(0));
-    private final Pose path9Pose  = new Pose(135, 36, Math.toRadians(0));
+    private final Pose row1ApproachPose = new Pose(92, 92, Math.toRadians(0));
+    private final Pose row2ApproachPose = new Pose(92, 68, Math.toRadians(0));
+    private final Pose row3ApproachPose = new Pose(92, 44, Math.toRadians(0));
+
+    private final Pose path2Pose = new Pose(92, 84, Math.toRadians(0));
+    private final Pose path3Pose = new Pose(129, 84, Math.toRadians(0));
+    private final Pose path5Pose = new Pose(92, 60, Math.toRadians(0));
+    private final Pose path6Pose = new Pose(135, 60, Math.toRadians(0));
+    private final Pose path8Pose = new Pose(92, 36, Math.toRadians(0));
+    private final Pose path9Pose = new Pose(135, 36, Math.toRadians(0));
     private final Pose path11Pose = new Pose(109, 71, Math.toRadians(0));
 
     // PATHS
     private PathChain path1A, path1B, path1C;
-    private PathChain path2, path3;
+    private PathChain path2Approach, path2, path3;
+    private PathChain path5Approach, path5, path6;
+    private PathChain path8Approach, path8, path9;
     private PathChain path4A, path4B, path4C;
-    private PathChain path5, path6;
     private PathChain path7A, path7B, path7C;
-    private PathChain path8, path9;
     private PathChain path10A, path10B, path10C;
     private PathChain path11;
 
@@ -87,6 +82,7 @@ public class PathRedSR_Test_NEW extends LinearOpMode {
 
     private static final double POSE_TOLERANCE = 4.5;
     private static final double STATE_TIMEOUT = 3.0;
+
     private double RPMshot = 2040;
 
     @Override
@@ -100,6 +96,12 @@ public class PathRedSR_Test_NEW extends LinearOpMode {
         frontRight = hardwareMap.get(DcMotor.class, "frontRight");
         backLeft = hardwareMap.get(DcMotor.class, "backLeft");
         backRight = hardwareMap.get(DcMotor.class, "backRight");
+
+        // NEW: gate servo
+        gate = hardwareMap.get(Servo.class, "gate");
+
+        // Force gate closed at start
+        gate.setPosition(1.0);
 
         intakeTop.setPower(0);
         shooter = new ShooterSubsystem(hardwareMap);
@@ -157,6 +159,16 @@ public class PathRedSR_Test_NEW extends LinearOpMode {
                         follower.breakFollowing();
                         setDrivePower(0, 0, 0, 0);
                         shootAllBalls();
+                        transitionTo(AutoState.DRIVE_PATH2_APPROACH);
+                    }
+                    break;
+
+                // ---------------- PATH 2 APPROACH ----------------
+                case DRIVE_PATH2_APPROACH:
+                    if (stateJustEntered()) {
+                        follower.followPath(path2Approach, false);
+                    }
+                    if (pathComplete(row1ApproachPose) || timedOut(STATE_TIMEOUT)) {
                         transitionTo(AutoState.DRIVE_PATH2);
                     }
                     break;
@@ -222,6 +234,16 @@ public class PathRedSR_Test_NEW extends LinearOpMode {
                         follower.breakFollowing();
                         setDrivePower(0, 0, 0, 0);
                         shootAllBalls();
+                        transitionTo(AutoState.DRIVE_PATH5_APPROACH);
+                    }
+                    break;
+
+                // ---------------- PATH 5 APPROACH ----------------
+                case DRIVE_PATH5_APPROACH:
+                    if (stateJustEntered()) {
+                        follower.followPath(path5Approach, false);
+                    }
+                    if (pathComplete(row2ApproachPose) || timedOut(STATE_TIMEOUT)) {
                         transitionTo(AutoState.DRIVE_PATH5);
                     }
                     break;
@@ -287,6 +309,16 @@ public class PathRedSR_Test_NEW extends LinearOpMode {
                         follower.breakFollowing();
                         setDrivePower(0, 0, 0, 0);
                         shootAllBalls();
+                        transitionTo(AutoState.DRIVE_PATH8_APPROACH);
+                    }
+                    break;
+
+                // ---------------- PATH 8 APPROACH ----------------
+                case DRIVE_PATH8_APPROACH:
+                    if (stateJustEntered()) {
+                        follower.followPath(path8Approach, false);
+                    }
+                    if (pathComplete(row3ApproachPose) || timedOut(STATE_TIMEOUT)) {
                         transitionTo(AutoState.DRIVE_PATH8);
                     }
                     break;
@@ -381,8 +413,8 @@ public class PathRedSR_Test_NEW extends LinearOpMode {
         intakeTop.setPower(0);
         setDrivePower(0, 0, 0, 0);
     }
-    // ---------------- STATE HELPERS ----------------
 
+    // ---------------- STATE HELPERS ----------------
     private boolean stateJustEntered() {
         if (lastState != currentState) {
             lastState = currentState;
@@ -407,9 +439,24 @@ public class PathRedSR_Test_NEW extends LinearOpMode {
         return Math.hypot(dx, dy) < POSE_TOLERANCE;
     }
 
-    // ---------------- SHOOTING ROUTINE ----------------
+    // ---------------- SERVO SETTER ----------------
+    private void servoSetter() {
+        double currentPos = gate.getPosition();
+        double degreesBack = backNum;
+        double totalDegrees = 1800.0;
 
+        double positionChange = degreesBack / totalDegrees;
+        double newPos = currentPos - positionChange;
+
+        newPos = Math.max(0.0, Math.min(1.0, newPos));
+        gate.setPosition(newPos);
+    }
+
+    // ---------------- SHOOTING ROUTINE ----------------
     private void shootAllBalls() throws InterruptedException {
+
+        // OPEN GATE FIRST
+        servoSetter();
 
         shooter.setTargetRPM(2100);
         sleep(1500);
@@ -418,7 +465,7 @@ public class PathRedSR_Test_NEW extends LinearOpMode {
         intakeTop.setPower(-1.0);
         sleep(300);
         intakeTop.setPower(0.5);
-        sleep(700);
+        sleep(600);
         intakeTop.setPower(0);
         sleep(300);
 
@@ -426,16 +473,19 @@ public class PathRedSR_Test_NEW extends LinearOpMode {
         intakeTop.setPower(-1.0);
         sleep(500);
         intakeTop.setPower(0.5);
-        sleep(700);
+        sleep(600);
         intakeTop.setPower(0);
         sleep(300);
 
         // Ball 3
         intakeTop.setPower(-1.0);
         sleep(800);
-
         intakeTop.setPower(0);
+
         shooter.stopShooter();
+
+        // CLOSE GATE AT END
+        gate.setPosition(1.0);
     }
 
     // ------------ DRIVE POWER HELPER -------------
@@ -447,243 +497,157 @@ public class PathRedSR_Test_NEW extends LinearOpMode {
     }
 
     // ---------------- PATH CONSTRAINTS ----------------
-    // FAST = 85% of robot max
     private static final PathConstraints FAST_CONSTRAINTS =
-            new PathConstraints(
-                    0.765,   // maxVel (85% of robot max)
-                    10.2,    // maxAccel (85% of robot max)
-                    0.6375,  // maxAngVel (85% of robot max)
-                    0.6375   // maxAngAccel (85% of robot max)
-            );
+            new PathConstraints(0.765, 10.2, 0.6375, 0.6375);
 
-    // SLOW = 35% of robot max
     private static final PathConstraints SLOW_CONSTRAINTS =
-            new PathConstraints(
-                    0.315,  // maxVel
-                    4.2,    // maxAccel
-                    0.2625, // maxAngVel
-                    0.2625  // maxAngAccel
-            );
+            new PathConstraints(0.315, 4.2, 0.2625, 0.2625);
+
+    private static final PathConstraints SUPER_SLOW_CONSTRAINTS =
+            new PathConstraints(0.135, 1.8, 0.1125, 0.1125);
 
     // ---------------- BUILD PATHS ----------------
     private void buildPaths() {
 
-        // ---------------------------------------------------------
-        // DRIVE_PATH1A  (FAST, vertical up)
-        // Rotate from 270° → -136.8° while moving upward
-        // ---------------------------------------------------------
+        // Path 1A
         path1A = follower.pathBuilder()
                 .addPath(new BezierLine(startPose, preShootPose))
-                .setLinearHeadingInterpolation(
-                        startPose.getHeading(),
-                        Math.toRadians(-136.8)
-                )
+                .setLinearHeadingInterpolation(startPose.getHeading(), Math.toRadians(-136.8))
                 .setConstraints(FAST_CONSTRAINTS)
                 .build();
 
-        // ---------------------------------------------------------
-        // DRIVE_PATH1B  (FAST, more vertical up)
-        // Hold shooting heading while moving upward
-        // ---------------------------------------------------------
+        // Path 1B
         path1B = follower.pathBuilder()
                 .addPath(new BezierLine(preShootPose, midShootPose))
                 .setConstantHeadingInterpolation(Math.toRadians(-136.8))
                 .setConstraints(FAST_CONSTRAINTS)
                 .build();
 
-        // ---------------------------------------------------------
-        // DRIVE_PATH1C  (SLOW, go to launching pose)
-        // Final slow alignment into the exact shooting position
-        // ---------------------------------------------------------
+        // Path 1C
         path1C = follower.pathBuilder()
                 .addPath(new BezierLine(midShootPose, launchingPose))
                 .setConstantHeadingInterpolation(Math.toRadians(-136.8))
                 .setConstraints(SLOW_CONSTRAINTS)
                 .build();
 
-        // ---------------------------------------------------------
-        // FIRE_BALLS  (no movement, use FAST constraints)
-        // No path needed — robot stops and shoots
-        // ---------------------------------------------------------
-
-
-        // ---------------------------------------------------------
-        // DRIVE_PATH2  (SLOW, go to first row of balls)
-        // ---------------------------------------------------------
-        path2 = follower.pathBuilder()
-                .addPath(new BezierLine(launchingPose, path2Pose))
-                .setLinearHeadingInterpolation(
-                        launchingPose.getHeading(),
-                        path2Pose.getHeading()
-                )
+        // ---------------- ROW 1 ----------------
+        path2Approach = follower.pathBuilder()
+                .addPath(new BezierLine(launchingPose, row1ApproachPose))
+                .setLinearHeadingInterpolation(launchingPose.getHeading(), 0)
                 .setConstraints(SLOW_CONSTRAINTS)
                 .build();
 
-        // ---------------------------------------------------------
-        // DRIVE_PATH3  (SLOW, pick up first row of balls)
-        // ---------------------------------------------------------
+        path2 = follower.pathBuilder()
+                .addPath(new BezierLine(row1ApproachPose, path2Pose))
+                .setConstantHeadingInterpolation(0)
+                .setConstraints(SLOW_CONSTRAINTS)
+                .build();
+
         path3 = follower.pathBuilder()
                 .addPath(new BezierLine(path2Pose, path3Pose))
-                .setConstantHeadingInterpolation(path2Pose.getHeading())
+                .setConstantHeadingInterpolation(0)
+                .setConstraints(SUPER_SLOW_CONSTRAINTS)
+                .build();
+
+        // ---------------- ROW 2 ----------------
+        path5Approach = follower.pathBuilder()
+                .addPath(new BezierLine(launchingPose, row2ApproachPose))
+                .setLinearHeadingInterpolation(launchingPose.getHeading(), 0)
                 .setConstraints(SLOW_CONSTRAINTS)
                 .build();
 
-        // ---------------------------------------------------------
-        // DRIVE_PATH4A  (FAST, go shoot)
-        // ---------------------------------------------------------
+        path5 = follower.pathBuilder()
+                .addPath(new BezierLine(row2ApproachPose, path5Pose))
+                .setConstantHeadingInterpolation(0)
+                .setConstraints(SLOW_CONSTRAINTS)
+                .build();
+
+        path6 = follower.pathBuilder()
+                .addPath(new BezierLine(path5Pose, path6Pose))
+                .setConstantHeadingInterpolation(0)
+                .setConstraints(SUPER_SLOW_CONSTRAINTS)
+                .build();
+
+        // ---------------- ROW 3 ----------------
+        path8Approach = follower.pathBuilder()
+                .addPath(new BezierLine(launchingPose, row3ApproachPose))
+                .setLinearHeadingInterpolation(launchingPose.getHeading(), 0)
+                .setConstraints(SLOW_CONSTRAINTS)
+                .build();
+
+        path8 = follower.pathBuilder()
+                .addPath(new BezierLine(row3ApproachPose, path8Pose))
+                .setConstantHeadingInterpolation(0)
+                .setConstraints(SLOW_CONSTRAINTS)
+                .build();
+
+        path9 = follower.pathBuilder()
+                .addPath(new BezierLine(path8Pose, path9Pose))
+                .setConstantHeadingInterpolation(0)
+                .setConstraints(SUPER_SLOW_CONSTRAINTS)
+                .build();
+
+        // ---------------- RETURN TO SHOOT ----------------
         path4A = follower.pathBuilder()
                 .addPath(new BezierLine(path3Pose, preShootPose))
-                .setLinearHeadingInterpolation(
-                        path3Pose.getHeading(),
-                        preShootPose.getHeading()
-                )
+                .setLinearHeadingInterpolation(0, Math.toRadians(-136.8))
                 .setConstraints(FAST_CONSTRAINTS)
                 .build();
 
-        // ---------------------------------------------------------
-        // DRIVE_PATH4B  (FAST, adjust)
-        // ---------------------------------------------------------
         path4B = follower.pathBuilder()
                 .addPath(new BezierLine(preShootPose, midShootPose))
                 .setConstantHeadingInterpolation(Math.toRadians(-136.8))
                 .setConstraints(FAST_CONSTRAINTS)
                 .build();
 
-        // ---------------------------------------------------------
-        // DRIVE_PATH4C  (SLOW, launching pose)
-        // ---------------------------------------------------------
         path4C = follower.pathBuilder()
                 .addPath(new BezierLine(midShootPose, launchingPose))
                 .setConstantHeadingInterpolation(Math.toRadians(-136.8))
                 .setConstraints(SLOW_CONSTRAINTS)
                 .build();
 
-        // ---------------------------------------------------------
-        // FIRE_BALLS1  (no movement, FAST constraints)
-        // ---------------------------------------------------------
-
-
-        // ---------------------------------------------------------
-        // DRIVE_PATH5  (SLOW, go to second row of balls)
-        // ---------------------------------------------------------
-        path5 = follower.pathBuilder()
-                .addPath(new BezierLine(launchingPose, path5Pose))
-                .setLinearHeadingInterpolation(
-                        launchingPose.getHeading(),
-                        path5Pose.getHeading()
-                )
-                .setConstraints(SLOW_CONSTRAINTS)
-                .build();
-
-        // ---------------------------------------------------------
-        // DRIVE_PATH6  (SLOW, pick up second row of balls)
-        // ---------------------------------------------------------
-        path6 = follower.pathBuilder()
-                .addPath(new BezierLine(path5Pose, path6Pose))
-                .setConstantHeadingInterpolation(path5Pose.getHeading())
-                .setConstraints(SLOW_CONSTRAINTS)
-                .build();
-
-        // ---------------------------------------------------------
-        // DRIVE_PATH7A  (FAST, go shoot)
-        // ---------------------------------------------------------
+        // ---------------- RETURN 2 ----------------
         path7A = follower.pathBuilder()
                 .addPath(new BezierLine(path6Pose, preShootPose))
-                .setLinearHeadingInterpolation(
-                        path6Pose.getHeading(),
-                        preShootPose.getHeading()
-                )
+                .setLinearHeadingInterpolation(0, Math.toRadians(-136.8))
                 .setConstraints(FAST_CONSTRAINTS)
                 .build();
 
-        // ---------------------------------------------------------
-        // DRIVE_PATH7B  (FAST, adjust)
-        // ---------------------------------------------------------
         path7B = follower.pathBuilder()
                 .addPath(new BezierLine(preShootPose, midShootPose))
                 .setConstantHeadingInterpolation(Math.toRadians(-136.8))
                 .setConstraints(FAST_CONSTRAINTS)
                 .build();
 
-        // ---------------------------------------------------------
-        // DRIVE_PATH7C  (SLOW, launching pose)
-        // ---------------------------------------------------------
         path7C = follower.pathBuilder()
                 .addPath(new BezierLine(midShootPose, launchingPose))
                 .setConstantHeadingInterpolation(Math.toRadians(-136.8))
                 .setConstraints(SLOW_CONSTRAINTS)
                 .build();
 
-        // ---------------------------------------------------------
-        // FIRE_BALLS2  (no movement, FAST constraints)
-        // ---------------------------------------------------------
-
-
-        // ---------------------------------------------------------
-        // DRIVE_PATH8  (SLOW, go to third row of balls)
-        // ---------------------------------------------------------
-        path8 = follower.pathBuilder()
-                .addPath(new BezierLine(launchingPose, path8Pose))
-                .setLinearHeadingInterpolation(
-                        launchingPose.getHeading(),
-                        path8Pose.getHeading()
-                )
-                .setConstraints(SLOW_CONSTRAINTS)
-                .build();
-
-        // ---------------------------------------------------------
-        // DRIVE_PATH9  (SLOW, pick up third row of balls)
-        // ---------------------------------------------------------
-        path9 = follower.pathBuilder()
-                .addPath(new BezierLine(path8Pose, path9Pose))
-                .setConstantHeadingInterpolation(path8Pose.getHeading())
-                .setConstraints(SLOW_CONSTRAINTS)
-                .build();
-
-        // ---------------------------------------------------------
-        // DRIVE_PATH10A  (FAST, go shoot)
-        // ---------------------------------------------------------
+        // ---------------- RETURN 3 ----------------
         path10A = follower.pathBuilder()
                 .addPath(new BezierLine(path9Pose, preShootPose))
-                .setLinearHeadingInterpolation(
-                        path9Pose.getHeading(),
-                        preShootPose.getHeading()
-                )
+                .setLinearHeadingInterpolation(0, Math.toRadians(-136.8))
                 .setConstraints(FAST_CONSTRAINTS)
                 .build();
 
-        // ---------------------------------------------------------
-        // DRIVE_PATH10B  (FAST, adjust)
-        // ---------------------------------------------------------
         path10B = follower.pathBuilder()
                 .addPath(new BezierLine(preShootPose, midShootPose))
                 .setConstantHeadingInterpolation(Math.toRadians(-136.8))
                 .setConstraints(FAST_CONSTRAINTS)
                 .build();
 
-        // ---------------------------------------------------------
-        // DRIVE_PATH10C  (SLOW, launching pose)
-        // ---------------------------------------------------------
         path10C = follower.pathBuilder()
                 .addPath(new BezierLine(midShootPose, launchingPose))
                 .setConstantHeadingInterpolation(Math.toRadians(-136.8))
                 .setConstraints(SLOW_CONSTRAINTS)
                 .build();
 
-        // ---------------------------------------------------------
-        // FIRE_BALLS3  (no movement, FAST constraints)
-        // ---------------------------------------------------------
-
-
-        // ---------------------------------------------------------
-        // DRIVE_PATH11  (FAST, get off line for move+leave RP)
-        // ---------------------------------------------------------
+        // ---------------- FINAL LEAVE ----------------
         path11 = follower.pathBuilder()
                 .addPath(new BezierLine(launchingPose, path11Pose))
-                .setLinearHeadingInterpolation(
-                        launchingPose.getHeading(),
-                        path11Pose.getHeading()
-                )
+                .setLinearHeadingInterpolation(Math.toRadians(-136.8), 0)
                 .setConstraints(FAST_CONSTRAINTS)
                 .build();
     }

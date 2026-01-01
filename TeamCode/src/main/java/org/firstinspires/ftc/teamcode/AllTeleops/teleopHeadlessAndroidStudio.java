@@ -41,7 +41,7 @@ public class teleopHeadlessAndroidStudio extends LinearOpMode {
     boolean gateOpen = false;
 
     double botHeading = 0.0;
-    double backNum = 80; //126 for wide (gate range for opening)
+    double backNum = 90; //126 for wide (gate range for opening)
 
     // NEW: speed divisor (default slow mode)
     double speedDivisor = 1.8;
@@ -82,7 +82,8 @@ public class teleopHeadlessAndroidStudio extends LinearOpMode {
         backLeft.setDirection(DcMotor.Direction.REVERSE);
         backRight.setDirection(DcMotor.Direction.FORWARD);
 
-        gate.setPosition(1.0);
+        double gateStartPos = gate.getPosition();   // read the servo’s actual physical position
+        gate.setPosition(gateStartPos);      // treat that as the new “1.0”
     }
 
     // ---------------------------------------------------------
