@@ -1,4 +1,9 @@
-UPDATED on 12/25/2025 at 9:57 PM.
+UPDATED on 1/1/2026 at 12:46 AM.
+
+Competition Use Ones:
+    -teleopHeadlessAndroidStudio
+    -PathRedSR_Test_ULTRA_NEW (all 3 rows not enough time)
+    -PathRedSR_Test_Crippled (official but test needed)
 
 pedroPathing:
     -constants
@@ -24,3 +29,7 @@ Autonomous's:
 Teleop's:
    -Official Teleop (teleopHeadlessAndroidStudio)
    -Tuning shooter PID (teleopHeadlessPIDshootingTest)
+
+Tests:
+    -PathRedSR_Test, PathRedSR_Test_NEW, PathRedSR_Test_ULTRA_NEW (shoots all balls {Complete USE last one}
+    -PathRedSR_Test_Crippled (only shoots 2 rows / competition one needs improve)
