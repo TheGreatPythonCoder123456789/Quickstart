@@ -33,3 +33,4 @@ Teleop's:
 Tests:
     -PathRedSR_Test, PathRedSR_Test_NEW, PathRedSR_Test_ULTRA_NEW (shoots all balls {Complete USE last one}
     -PathRedSR_Test_Crippled (only shoots 2 rows / competition one needs improve)
+    -Teleop_PedroTracking_Test (try pedro pathing in teleop {STILL EARLY} for launching Pose)
