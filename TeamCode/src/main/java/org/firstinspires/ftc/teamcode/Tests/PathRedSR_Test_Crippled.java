@@ -48,11 +48,12 @@ public class PathRedSR_Test_Crippled extends LinearOpMode {
     // ---------------- Shooter Config ----------------
     private double backNum = 80;
 
-    // ---------------- Poses ----------------
+    // ---------------- Poses (Option B applied) ----------------
     private final Pose startPose = new Pose(88, 9, Math.toRadians(270));
-    private final Pose preShootPose = new Pose(92.0, 80.0, Math.toRadians(-136.8));
-    private final Pose midShootPose = new Pose(92.0, 89.6, Math.toRadians(-136.8));
-    private final Pose launchingPose = new Pose(89.35, 92.6, Math.toRadians(-136.8));
+
+    private final Pose preShootPose = new Pose(89.10, 77.24, Math.toRadians(-136.8));   // moved 4 down
+    private final Pose midShootPose = new Pose(89.10, 86.84, Math.toRadians(-136.8));   // moved 4 down
+    private final Pose launchingPose = new Pose(86.45, 89.84, Math.toRadians(-136.8));  // moved 4 down
 
     private final Pose row1ApproachPose = new Pose(92, 92, Math.toRadians(0));
     private final Pose row2ApproachPose = new Pose(92, 68, Math.toRadians(0));
@@ -67,7 +68,6 @@ public class PathRedSR_Test_Crippled extends LinearOpMode {
     private final Pose path8Pose = new Pose(92, 36, Math.toRadians(0));
     private final Pose path9Pose = new Pose(135, 36, Math.toRadians(0));
 
-    // New final pose
     private final Pose path10EndPose = new Pose(120, 80, Math.toRadians(0));
 
     // ---------------- PathChains ----------------
@@ -87,8 +87,8 @@ public class PathRedSR_Test_Crippled extends LinearOpMode {
     private static final double POSE_TOLERANCE = 4.5;
     private static final double STATE_TIMEOUT = 3.0;
 
-    private double RPMshot = 2065;
-    private double RPMlow = 2065;
+    private double RPMshot = 2055;
+    private double RPMlow = 2055;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -271,7 +271,6 @@ public class PathRedSR_Test_Crippled extends LinearOpMode {
                         transitionTo(AutoState.DRIVE_PATH6);
                     }
                     break;
-
                 // ---------------- Path 6 ----------------
                 case DRIVE_PATH6:
                     if (stateJustEntered()) {
@@ -294,6 +293,7 @@ public class PathRedSR_Test_Crippled extends LinearOpMode {
                         transitionTo(AutoState.DRIVE_PATH7B);
                     }
                     break;
+
                 // ---------------- Path 7B ----------------
                 case DRIVE_PATH7B:
                     if (stateJustEntered()) {
@@ -445,8 +445,8 @@ public class PathRedSR_Test_Crippled extends LinearOpMode {
 
         intakeTop.setPower(-1.0);
         sleep(800);
-        intakeTop.setPower(0);
 
+        intakeTop.setPower(0);
         shooter.stopShooter();
         gate.setPosition(1.0);
     }
@@ -584,8 +584,8 @@ public class PathRedSR_Test_Crippled extends LinearOpMode {
         path10 = follower.pathBuilder()
                 .addPath(new BezierCurve(
                         path9Pose,
-                        new Pose(107, 56, Math.toRadians(0)), // control point
-                        path10EndPose                          // end point
+                        new Pose(107, 56, Math.toRadians(0)),
+                        path10EndPose
                 ))
                 .setConstantHeadingInterpolation(0)
                 .setConstraints(FAST_CONSTRAINTS)

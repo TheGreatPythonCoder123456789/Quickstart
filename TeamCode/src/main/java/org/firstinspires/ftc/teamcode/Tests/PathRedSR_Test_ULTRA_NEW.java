@@ -78,8 +78,8 @@ public class PathRedSR_Test_ULTRA_NEW extends LinearOpMode {
     private static final double POSE_TOLERANCE = 4.5;
     private static final double STATE_TIMEOUT = 3.0;
 
-    private double RPMshot = 2065; // normal RPM for cycles 1–3
-    private double RPMlow = 2065; //low RPM for preloaded cycle
+    private double RPMshot = 2055; // normal RPM for cycles 1–3
+    private double RPMlow = 2055; //low RPM for preloaded cycle
 
     @Override
     public void runOpMode() throws InterruptedException {
