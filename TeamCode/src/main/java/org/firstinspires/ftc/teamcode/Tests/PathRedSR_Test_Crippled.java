@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.Tests;
 // ---------------- Imports ----------------
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
-import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.paths.PathConstraints;
@@ -31,7 +30,6 @@ public class PathRedSR_Test_Crippled extends LinearOpMode {
         DRIVE_PATH7A, DRIVE_PATH7B, DRIVE_PATH7C,
         FIRE_BALLS2,
         DRIVE_PATH8_APPROACH, DRIVE_PATH8, DRIVE_PATH9,
-        DRIVE_PATH10,
         DONE
     }
 
@@ -51,8 +49,8 @@ public class PathRedSR_Test_Crippled extends LinearOpMode {
     // ---------------- Poses (Option B applied) ----------------
     private final Pose startPose = new Pose(88, 9, Math.toRadians(270));
 
-    private final Pose preShootPose = new Pose(89.10, 77.24, Math.toRadians(-136.8));   // moved 4 down
-    private final Pose midShootPose = new Pose(89.10, 86.84, Math.toRadians(-136.8));   // moved 4 down
+    private final Pose preShootPose = new Pose(86.45, 77.24, Math.toRadians(-136.8));   // moved 4 down
+    private final Pose midShootPose = new Pose(86.45, 86.84, Math.toRadians(-136.8));   // moved 4 down
     private final Pose launchingPose = new Pose(86.45, 89.84, Math.toRadians(-136.8));  // moved 4 down
 
     private final Pose row1ApproachPose = new Pose(92, 92, Math.toRadians(0));
@@ -68,8 +66,6 @@ public class PathRedSR_Test_Crippled extends LinearOpMode {
     private final Pose path8Pose = new Pose(92, 36, Math.toRadians(0));
     private final Pose path9Pose = new Pose(135, 36, Math.toRadians(0));
 
-    private final Pose path10EndPose = new Pose(120, 80, Math.toRadians(0));
-
     // ---------------- PathChains ----------------
     private PathChain path1A, path1B, path1C;
     private PathChain path2Approach, path2, path3;
@@ -77,18 +73,17 @@ public class PathRedSR_Test_Crippled extends LinearOpMode {
     private PathChain path8Approach, path8, path9;
     private PathChain path4A, path4B, path4C;
     private PathChain path7A, path7B, path7C;
-    private PathChain path10;
 
     // ---------------- State Tracking ----------------
     private AutoState currentState;
     private AutoState lastState = null;
 
     // ---------------- Constants ----------------
-    private static final double POSE_TOLERANCE = 4.5;
+    private static final double POSE_TOLERANCE = 3.5;
     private static final double STATE_TIMEOUT = 3.0;
 
-    private double RPMshot = 2055;
-    private double RPMlow = 2055;
+    private double RPMshot = 2025;
+    private double RPMlow = 2025;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -355,16 +350,6 @@ public class PathRedSR_Test_Crippled extends LinearOpMode {
                     }
                     if (pathComplete(path9Pose) || timedOut(STATE_TIMEOUT)) {
                         intakeTop.setPower(0);
-                        transitionTo(AutoState.DRIVE_PATH10);
-                    }
-                    break;
-
-                // ---------------- Final Arc Path 10 ----------------
-                case DRIVE_PATH10:
-                    if (stateJustEntered()) {
-                        follower.followPath(path10, false);
-                    }
-                    if (pathComplete(path10EndPose) || timedOut(STATE_TIMEOUT)) {
                         transitionTo(AutoState.DONE);
                     }
                     break;
@@ -417,14 +402,20 @@ public class PathRedSR_Test_Crippled extends LinearOpMode {
     private void waitForShooterReady() {
         long start = System.currentTimeMillis();
         while (opModeIsActive()) {
-            if (shooter.getLeftShooterVelocity() > 1850 &&
-                    shooter.getRightShooterVelocity() > 1850) break;
+            if (shooter.getLeftShooterVelocity() > 900 &&
+                    shooter.getRightShooterVelocity() > 900) break;
             if (System.currentTimeMillis() - start > 1200) break;
             sleep(10);
         }
     }
 
     // ---------------- Shooting Routine ----------------
+    //2 seconds saved if no arc at the end
+    //divide among shooting sequences to save time
+    // 2/3=0.6666 seconds each shooting has extra now
+    //split that up in 2 needed to save so 0.3333 recovery for first 2 balls(after them).
+    //convert 0.3333 seconds to milliseconds. (333.33 milliseconds).
+    //save to run (!Done)
     private void shootAllBalls() throws InterruptedException {
         servoSetter();
         waitForShooterReady();
@@ -434,14 +425,14 @@ public class PathRedSR_Test_Crippled extends LinearOpMode {
         intakeTop.setPower(0.8);
         sleep(150);
         intakeTop.setPower(0);
-        sleep(400);
+        sleep(733); //added 0.33333 seconds
 
         intakeTop.setPower(-1.0);
         sleep(250);
         intakeTop.setPower(0.8);
-        sleep(250);
+        sleep(150);
         intakeTop.setPower(0);
-        sleep(200);
+        sleep(533); //added 0.33333 seconds
 
         intakeTop.setPower(-1.0);
         sleep(800);
@@ -578,17 +569,6 @@ public class PathRedSR_Test_Crippled extends LinearOpMode {
                 .addPath(new BezierLine(midShootPose, launchingPose))
                 .setConstantHeadingInterpolation(Math.toRadians(-136.8))
                 .setConstraints(SUPER_SLOW_CONSTRAINTS)
-                .build();
-
-        // Final arc path
-        path10 = follower.pathBuilder()
-                .addPath(new BezierCurve(
-                        path9Pose,
-                        new Pose(107, 56, Math.toRadians(0)),
-                        path10EndPose
-                ))
-                .setConstantHeadingInterpolation(0)
-                .setConstraints(FAST_CONSTRAINTS)
                 .build();
     }
 }

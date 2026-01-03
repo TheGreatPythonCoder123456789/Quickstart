@@ -460,13 +460,9 @@ public class PathRedSR_Test_ULTRA_NEW extends LinearOpMode {
 
     // ---------------- SHOOTING ROUTINE ----------------
     private void shootAllBalls() throws InterruptedException {
-
         servoSetter();
-        // shooter.setTargetRPM(...) is set in the state before calling this
-
         waitForShooterReady();
 
-        // Ball 1
         intakeTop.setPower(-1.0);
         sleep(250);
         intakeTop.setPower(0.8);
@@ -474,19 +470,17 @@ public class PathRedSR_Test_ULTRA_NEW extends LinearOpMode {
         intakeTop.setPower(0);
         sleep(400);
 
-        // Ball 2
         intakeTop.setPower(-1.0);
         sleep(250);
         intakeTop.setPower(0.8);
-        sleep(250);
+        sleep(150);
         intakeTop.setPower(0);
         sleep(200);
 
-        // Ball 3
         intakeTop.setPower(-1.0);
         sleep(800);
-        intakeTop.setPower(0);
 
+        intakeTop.setPower(0);
         shooter.stopShooter();
         gate.setPosition(1.0);
     }

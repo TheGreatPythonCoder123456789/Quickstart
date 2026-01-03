@@ -5,16 +5,23 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class ShooterSubsystem {
+
     private DcMotorEx shootLeft;
     private DcMotorEx shootRight;
 
     private static final int TICKS_PER_REV = 28;
 
-    // Perfected baseline values
-    private double baseP = 5.4;
-    private double baseD = 0.7;
-    private double baseFLeft = 12.95;
-    private double baseFRight = 12.75;
+    // Default baseline values (can be overwritten by TeleOp tuning)
+    /*
+    * private double baseP = 5.4;
+    * private double baseD = 0.7;
+    * private double baseFLeft = 12.95;
+    * private double baseFRight = 12.75;
+    */
+    private double baseP = 6.9;
+    private double baseD = 1.1;
+    private double baseFLeft = 12.3;
+    private double baseFRight = 11.7;
 
     public ShooterSubsystem(HardwareMap hardwareMap) {
         shootLeft  = hardwareMap.get(DcMotorEx.class, "shootLeft");
@@ -22,13 +29,18 @@ public class ShooterSubsystem {
 
         shootRight.setDirection(DcMotorEx.Direction.REVERSE);
 
-        // Apply perfected PIDF
+        applyPIDF();
+    }
+
+    private void applyPIDF() {
         PIDFCoefficients leftPIDF  = new PIDFCoefficients(baseP, 0.0, baseD, baseFLeft);
         PIDFCoefficients rightPIDF = new PIDFCoefficients(baseP, 0.0, baseD, baseFRight);
 
         shootLeft.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, leftPIDF);
         shootRight.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, rightPIDF);
     }
+
+    // ---------------- Shooter Control ----------------
 
     public void setShooterVelocity(double ticksPerSecond) {
         shootLeft.setVelocity(ticksPerSecond);
@@ -53,12 +65,28 @@ public class ShooterSubsystem {
         return shootRight.getVelocity();
     }
 
-    // Re-added: Update P/D live for TeleOp test
-    public void updatePD(double pLeft, double dLeft, double pRight, double dRight) {
-        PIDFCoefficients leftPIDF  = new PIDFCoefficients(pLeft, 0.0, dLeft, baseFLeft);
-        PIDFCoefficients rightPIDF = new PIDFCoefficients(pRight, 0.0, dRight, baseFRight);
+    // ---------------- Live Tuning ----------------
 
-        shootLeft.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, leftPIDF);
-        shootRight.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, rightPIDF);
+    public void updatePD(double pLeft, double dLeft, double pRight, double dRight) {
+        baseP = pLeft;
+        baseD = dLeft;
+        applyPIDF();
     }
+
+    public void updatePD_official(double p, double d) {
+        baseP = p;
+        baseD = d;
+        applyPIDF();
+    }
+
+    public void updateF(double fLeft, double fRight) {
+        baseFLeft = fLeft;
+        baseFRight = fRight;
+        applyPIDF();
+    }
+
+    public double getFLeft() { return baseFLeft; }
+    public double getFRight() { return baseFRight; }
+    public double getP() { return baseP; }
+    public double getD() { return baseD; }
 }
