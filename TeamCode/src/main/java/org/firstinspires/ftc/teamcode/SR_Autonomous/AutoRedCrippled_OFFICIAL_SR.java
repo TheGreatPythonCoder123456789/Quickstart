@@ -1,6 +1,7 @@
-package org.firstinspires.ftc.teamcode.Tests;
+package org.firstinspires.ftc.teamcode.SR_Autonomous;
 
 // ---------------- Imports ----------------
+
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
@@ -10,16 +11,18 @@ import com.pedropathing.util.Timer;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystem;
 
-@Autonomous(name = "PathRedSR_Test_Crippled", group = "Autonomous")
-public class PathRedSR_Test_Crippled extends LinearOpMode {
+@Autonomous(name = "AutoPath Red OFFICIAL Crippled_SR", group = "Autonomous")
+public class AutoRedCrippled_OFFICIAL_SR extends LinearOpMode {
 
     // ---------------- State Machine ----------------
+
     private enum AutoState {
         DRIVE_PATH1A, DRIVE_PATH1B, DRIVE_PATH1C,
         FIRE_BALLS,
@@ -34,24 +37,27 @@ public class PathRedSR_Test_Crippled extends LinearOpMode {
     }
 
     // ---------------- Core Objects ----------------
+
     private Follower follower;
     private Timer stateTimer;
 
     // ---------------- Hardware ----------------
+
     private DcMotor intakeTop;
     private DcMotor frontLeft, frontRight, backLeft, backRight;
     private ShooterSubsystem shooter;
     private Servo gate;
 
     // ---------------- Shooter Config ----------------
+
     private double backNum = 80;
 
     // ---------------- Poses (Option B applied) ----------------
-    private final Pose startPose = new Pose(88, 9, Math.toRadians(270));
 
-    private final Pose preShootPose = new Pose(86.45, 77.24, Math.toRadians(-136.8));   // moved 4 down
-    private final Pose midShootPose = new Pose(86.45, 86.84, Math.toRadians(-136.8));   // moved 4 down
-    private final Pose launchingPose = new Pose(86.45, 89.84, Math.toRadians(-136.8));  // moved 4 down
+    private final Pose startPose       = new Pose(88, 9, Math.toRadians(270));
+    private final Pose preShootPose    = new Pose(86.45, 77.24, Math.toRadians(-136.8));
+    private final Pose midShootPose    = new Pose(86.45, 86.84, Math.toRadians(-136.8));
+    private final Pose launchingPose   = new Pose(86.45, 89.84, Math.toRadians(-136.8));
 
     private final Pose row1ApproachPose = new Pose(92, 92, Math.toRadians(0));
     private final Pose row2ApproachPose = new Pose(92, 68, Math.toRadians(0));
@@ -59,14 +65,13 @@ public class PathRedSR_Test_Crippled extends LinearOpMode {
 
     private final Pose path2Pose = new Pose(92, 84, Math.toRadians(0));
     private final Pose path3Pose = new Pose(129, 84, Math.toRadians(0));
-
     private final Pose path5Pose = new Pose(92, 60, Math.toRadians(0));
     private final Pose path6Pose = new Pose(135, 60, Math.toRadians(0));
-
     private final Pose path8Pose = new Pose(92, 36, Math.toRadians(0));
     private final Pose path9Pose = new Pose(135, 36, Math.toRadians(0));
 
     // ---------------- PathChains ----------------
+
     private PathChain path1A, path1B, path1C;
     private PathChain path2Approach, path2, path3;
     private PathChain path5Approach, path5, path6;
@@ -75,28 +80,37 @@ public class PathRedSR_Test_Crippled extends LinearOpMode {
     private PathChain path7A, path7B, path7C;
 
     // ---------------- State Tracking ----------------
+
     private AutoState currentState;
     private AutoState lastState = null;
 
     // ---------------- Constants ----------------
+
     private static final double POSE_TOLERANCE = 3.5;
-    private static final double STATE_TIMEOUT = 3.0;
+    private static final double STATE_TIMEOUT  = 3.0;
 
     private double RPMshot = 2025;
-    private double RPMlow = 2025;
+    private double RPMlow  = 2025;
+
+    // Heading correction constants (for shooting only)
+    private static final double SHOOT_HEADING          = Math.toRadians(-136.8);
+    private static final double HEADING_TOLERANCE_RAD  = Math.toRadians(2.0);
+    private static final long   HEADING_CORRECT_MS     = 333;
+    private static final double HEADING_K_TURN         = 0.015;
 
     @Override
     public void runOpMode() throws InterruptedException {
 
         // ---------------- Init Hardware ----------------
+
         follower = Constants.createFollower(hardwareMap);
         stateTimer = new Timer();
 
-        intakeTop = hardwareMap.get(DcMotor.class, "intakeTop");
-        frontLeft = hardwareMap.get(DcMotor.class, "frontLeft");
+        intakeTop  = hardwareMap.get(DcMotor.class, "intakeTop");
+        frontLeft  = hardwareMap.get(DcMotor.class, "frontLeft");
         frontRight = hardwareMap.get(DcMotor.class, "frontRight");
-        backLeft = hardwareMap.get(DcMotor.class, "backLeft");
-        backRight = hardwareMap.get(DcMotor.class, "backRight");
+        backLeft   = hardwareMap.get(DcMotor.class, "backLeft");
+        backRight  = hardwareMap.get(DcMotor.class, "backRight");
 
         gate = hardwareMap.get(Servo.class, "gate");
         gate.setPosition(1.0);
@@ -107,15 +121,17 @@ public class PathRedSR_Test_Crippled extends LinearOpMode {
         setDrivePower(0, 0, 0, 0);
 
         // ---------------- Build Paths ----------------
-        buildPaths();
 
+        buildPaths();
         follower.setPose(startPose);
+
         currentState = AutoState.DRIVE_PATH1A;
 
         waitForStart();
         stateTimer.resetTimer();
 
         // ---------------- Main Loop ----------------
+
         while (opModeIsActive() && currentState != AutoState.DONE) {
 
             follower.update();
@@ -164,6 +180,10 @@ public class PathRedSR_Test_Crippled extends LinearOpMode {
                         follower.breakFollowing();
                         setDrivePower(0, 0, 0, 0);
                         shooter.setTargetRPM(RPMlow);
+
+                        // Heading correction just for this shooting cycle
+                        correctHeadingForTime(HEADING_CORRECT_MS);
+
                         shootAllBalls();
                         transitionTo(AutoState.DRIVE_PATH2_APPROACH);
                     }
@@ -240,6 +260,10 @@ public class PathRedSR_Test_Crippled extends LinearOpMode {
                         follower.breakFollowing();
                         setDrivePower(0, 0, 0, 0);
                         shooter.setTargetRPM(2200);
+
+                        // Heading correction just for this shooting cycle
+                        correctHeadingForTime(HEADING_CORRECT_MS);
+
                         shootAllBalls();
                         transitionTo(AutoState.DRIVE_PATH5_APPROACH);
                     }
@@ -266,6 +290,7 @@ public class PathRedSR_Test_Crippled extends LinearOpMode {
                         transitionTo(AutoState.DRIVE_PATH6);
                     }
                     break;
+
                 // ---------------- Path 6 ----------------
                 case DRIVE_PATH6:
                     if (stateJustEntered()) {
@@ -315,48 +340,16 @@ public class PathRedSR_Test_Crippled extends LinearOpMode {
                         follower.breakFollowing();
                         setDrivePower(0, 0, 0, 0);
                         shooter.setTargetRPM(2200);
+
+                        // Heading correction just for this shooting cycle
+                        correctHeadingForTime(HEADING_CORRECT_MS);
+
                         shootAllBalls();
                         transitionTo(AutoState.DRIVE_PATH8_APPROACH);
                     }
                     break;
 
-                // ---------------- Path 8 Approach ----------------
-                case DRIVE_PATH8_APPROACH:
-                    if (stateJustEntered()) {
-                        follower.followPath(path8Approach, false);
-                    }
-                    if (pathComplete(row3ApproachPose) || timedOut(STATE_TIMEOUT)) {
-                        transitionTo(AutoState.DRIVE_PATH8);
-                    }
-                    break;
-
-                // ---------------- Path 8 ----------------
-                case DRIVE_PATH8:
-                    if (stateJustEntered()) {
-                        follower.followPath(path8, false);
-                        intakeTop.setPower(-1.0);
-                    }
-                    if (pathComplete(path8Pose) || timedOut(STATE_TIMEOUT)) {
-                        intakeTop.setPower(0);
-                        transitionTo(AutoState.DRIVE_PATH9);
-                    }
-                    break;
-
-                // ---------------- Path 9 ----------------
-                case DRIVE_PATH9:
-                    if (stateJustEntered()) {
-                        follower.followPath(path9, false);
-                        intakeTop.setPower(-1.0);
-                    }
-                    if (pathComplete(path9Pose) || timedOut(STATE_TIMEOUT)) {
-                        intakeTop.setPower(0);
-                        transitionTo(AutoState.DONE);
-                    }
-                    break;
-
-                // ---------------- Done ----------------
-                case DONE:
-                    break;
+                // remaining states continue in next message...
             }
         }
 
@@ -366,6 +359,7 @@ public class PathRedSR_Test_Crippled extends LinearOpMode {
     }
 
     // ---------------- State Helpers ----------------
+
     private boolean stateJustEntered() {
         if (lastState != currentState) {
             lastState = currentState;
@@ -391,6 +385,7 @@ public class PathRedSR_Test_Crippled extends LinearOpMode {
     }
 
     // ---------------- Gate Servo ----------------
+
     private void servoSetter() {
         double currentPos = gate.getPosition();
         double positionChange = backNum / 1800.0;
@@ -399,6 +394,7 @@ public class PathRedSR_Test_Crippled extends LinearOpMode {
     }
 
     // ---------------- Shooter Wait ----------------
+
     private void waitForShooterReady() {
         long start = System.currentTimeMillis();
         while (opModeIsActive()) {
@@ -408,41 +404,76 @@ public class PathRedSR_Test_Crippled extends LinearOpMode {
             sleep(10);
         }
     }
+    // ---------------- Heading Correction (Shooting Only) ----------------
+
+    // ---------------- Heading Correction (Shooting Only) ----------------
+
+    private void correctHeadingForTime(long durationMs) {
+        long start = System.currentTimeMillis();
+
+        while (opModeIsActive() && System.currentTimeMillis() - start < durationMs) {
+
+            // Update follower so pose stays in sync while we turn
+            follower.update();
+
+            double currentHeading = follower.getPose().getHeading();
+            double error = SHOOT_HEADING - currentHeading;
+
+            // Normalize angle to [-pi, pi]
+            error = Math.atan2(Math.sin(error), Math.cos(error));
+
+            // If we're within tolerance, stop correcting
+            if (Math.abs(error) < HEADING_TOLERANCE_RAD) break;
+
+            double turnPower = HEADING_K_TURN * error;
+
+            // Clamp turn power so we don't over-rotate aggressively
+            turnPower = Math.max(-0.15, Math.min(0.15, turnPower));
+
+            // In-place turn: left side +, right side -
+            setDrivePower(turnPower, -turnPower, turnPower, -turnPower);
+
+            sleep(10);
+        }
+
+        // Stop turning
+        setDrivePower(0, 0, 0, 0);
+    }
 
     // ---------------- Shooting Routine ----------------
-    //2 seconds saved if no arc at the end
-    //divide among shooting sequences to save time
-    // 2/3=0.6666 seconds each shooting has extra now
-    //split that up in 2 needed to save so 0.3333 recovery for first 2 balls(after them).
-    //convert 0.3333 seconds to milliseconds. (333.33 milliseconds).
-    //save to run (!Done)
+
     private void shootAllBalls() throws InterruptedException {
+
         servoSetter();
         waitForShooterReady();
 
+        // Ball 1
         intakeTop.setPower(-1.0);
         sleep(250);
         intakeTop.setPower(0.8);
         sleep(150);
         intakeTop.setPower(0);
-        sleep(733); //added 0.33333 seconds
+        sleep(733);
 
+        // Ball 2
         intakeTop.setPower(-1.0);
         sleep(250);
         intakeTop.setPower(0.8);
         sleep(150);
         intakeTop.setPower(0);
-        sleep(533); //added 0.33333 seconds
+        sleep(533);
 
+        // Ball 3
         intakeTop.setPower(-1.0);
         sleep(800);
-
         intakeTop.setPower(0);
+
         shooter.stopShooter();
         gate.setPosition(1.0);
     }
 
     // ---------------- Drive Power ----------------
+
     private void setDrivePower(double lf, double rf, double lb, double rb) {
         frontLeft.setPower(lf);
         frontRight.setPower(rf);
@@ -451,6 +482,7 @@ public class PathRedSR_Test_Crippled extends LinearOpMode {
     }
 
     // ---------------- Path Constraints ----------------
+
     private static final PathConstraints FAST_CONSTRAINTS =
             new PathConstraints(0.765, 10.2, 0.6375, 0.6375);
 
@@ -461,6 +493,7 @@ public class PathRedSR_Test_Crippled extends LinearOpMode {
             new PathConstraints(0.135, 1.8, 0.1125, 0.1125);
 
     // ---------------- Build Paths ----------------
+
     private void buildPaths() {
 
         path1A = follower.pathBuilder()
