@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.AutonomousOFFICIAL;
+package org.firstinspires.ftc.teamcode.SR_Autonomous;
 
 // ---------------- Imports ----------------
 
@@ -18,7 +18,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystem;
 
-@Autonomous(name = "Blue Back OFFICIAL", group = "Autonomous")
+@Autonomous(name = "AutoPath Blue OFFICIAL Crippled_SR", group = "Autonomous")
 public class AutoBlueCrippled_OFFICIAL_SR extends LinearOpMode {
 
     // ---------------- State Machine ----------------
