@@ -56,8 +56,8 @@ public class AutoRedCrippled_OFFICIAL_SR extends LinearOpMode {
 
     private final Pose startPose       = new Pose(88, 9, Math.toRadians(270));
     private final Pose preShootPose    = new Pose(86.45, 77.24, Math.toRadians(-136.8));
-    private final Pose midShootPose    = new Pose(86.45, 86.84, Math.toRadians(-138));
-    private final Pose launchingPose   = new Pose(86.45, 89.84, Math.toRadians(-140));
+    private final Pose midShootPose    = new Pose(86.45, 86.84, Math.toRadians(-136.8));
+    private final Pose launchingPose   = new Pose(86.45, 89.84, Math.toRadians(-136.8));
 
     private final Pose row1ApproachPose = new Pose(92, 92, Math.toRadians(0));
     private final Pose row2ApproachPose = new Pose(92, 68, Math.toRadians(0));
@@ -520,13 +520,13 @@ public class AutoRedCrippled_OFFICIAL_SR extends LinearOpMode {
 
         path1B = follower.pathBuilder()
                 .addPath(new BezierLine(preShootPose, midShootPose))
-                .setLinearHeadingInterpolation(preShootPose.getHeading(), Math.toRadians(-138))
+                .setConstantHeadingInterpolation(Math.toRadians(-136.8))
                 .setConstraints(SLOW_CONSTRAINTS)
                 .build();
 
         path1C = follower.pathBuilder()
                 .addPath(new BezierLine(midShootPose, launchingPose))
-                .setLinearHeadingInterpolation(midShootPose.getHeading(), Math.toRadians(-140))
+                .setConstantHeadingInterpolation(Math.toRadians(-136.8))
                 .setConstraints(SLOW_CONSTRAINTS)
                 .build();
 
