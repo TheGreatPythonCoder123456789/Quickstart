@@ -136,9 +136,25 @@ public class AutoRedCrippled_OFFICIAL_SR extends LinearOpMode {
 
             follower.update();
 
-            telemetry.addData("Shooter L", shooter.getLeftShooterVelocity());
-            telemetry.addData("Shooter R", shooter.getRightShooterVelocity());
-            telemetry.addData("State", currentState);
+            Pose pose = follower.getPose();
+            double headingDeg = Math.toDegrees(pose.getHeading());
+
+            telemetry.addLine("=== Robot Pose ===");
+            telemetry.addData("X", pose.getX());
+            telemetry.addData("Y", pose.getY());
+            telemetry.addData("Heading (deg)", headingDeg);
+
+            telemetry.addLine("=== Shooter ===");
+            telemetry.addData("Left RPM", shooter.getLeftShooterVelocity());
+            telemetry.addData("Right RPM", shooter.getRightShooterVelocity());
+
+            telemetry.addLine("=== Intake ===");
+            telemetry.addData("Intake Power", intakeTop.getPower());
+
+            telemetry.addLine("=== State Machine ===");
+            telemetry.addData("Current State", currentState);
+            telemetry.addData("State Timer", stateTimer.getElapsedTimeSeconds());
+
             telemetry.update();
 
             switch (currentState) {
