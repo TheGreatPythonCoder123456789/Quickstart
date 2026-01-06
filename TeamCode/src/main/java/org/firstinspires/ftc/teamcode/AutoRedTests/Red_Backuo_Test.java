@@ -1,6 +1,6 @@
-package org.firstinspires.ftc.teamcode.SR_Autonomous;
+package org.firstinspires.ftc.teamcode.AutoRedTests;
 
-
+//Best one right now
 // ---------------- Imports ----------------
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
@@ -20,8 +20,8 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystem;
 
 
-@Autonomous(name = "AutoRedCrippled_BACKUP_SR", group = "Autonomous")
-public class AutoRedCrippled_BACKUP_SR extends LinearOpMode {
+@Autonomous(name = "Red_Backup_test", group = "Autonomous")
+public class Red_Backuo_Test extends LinearOpMode {
 
 
     // ---------------- State Machine ----------------
@@ -60,8 +60,9 @@ public class AutoRedCrippled_BACKUP_SR extends LinearOpMode {
 
 
     private final Pose preShootPose = new Pose(86.45, 77.24, Math.toRadians(-136.8));   // moved 4 down
-    private final Pose midShootPose = new Pose(86.45, 86.84, Math.toRadians(-136.8));   // moved 4 down
-    private final Pose launchingPose = new Pose(86.45, 89.84, Math.toRadians(-136.8));  // moved 4 down
+    private final Pose midShootPose = new Pose(86.45, 86.84, Math.toRadians(-138));   // moved 4 down
+    private final Pose launchingPose = new Pose(86.45, 89.84, Math.toRadians(-140));  // moved 4 down
+    private final Pose launchingPose2 = new Pose(86.45, 89.84, Math.toRadians(-142)); //SECOND ROW
 
 
     private final Pose row1ApproachPose = new Pose(92, 92, Math.toRadians(0));
@@ -542,14 +543,14 @@ public class AutoRedCrippled_BACKUP_SR extends LinearOpMode {
 
         path1B = follower.pathBuilder()
                 .addPath(new BezierLine(preShootPose, midShootPose))
-                .setConstantHeadingInterpolation(Math.toRadians(-136.8))
+                .setLinearHeadingInterpolation(preShootPose.getHeading(), Math.toRadians(-138))
                 .setConstraints(SLOW_CONSTRAINTS)
                 .build();
 
 
         path1C = follower.pathBuilder()
                 .addPath(new BezierLine(midShootPose, launchingPose))
-                .setConstantHeadingInterpolation(Math.toRadians(-136.8))
+                .setLinearHeadingInterpolation(midShootPose.getHeading(), Math.toRadians(-140))
                 .setConstraints(SLOW_CONSTRAINTS)
                 .build();
 
@@ -619,43 +620,43 @@ public class AutoRedCrippled_BACKUP_SR extends LinearOpMode {
 
         path4A = follower.pathBuilder()
                 .addPath(new BezierLine(path3Pose, preShootPose))
-                .setLinearHeadingInterpolation(0, Math.toRadians(-136.8))
-                .setConstraints(FAST_CONSTRAINTS)
+                .setLinearHeadingInterpolation(path3Pose.getHeading(), Math.toRadians(-136.8))
+                .setConstraints(SUPER_SLOW_CONSTRAINTS)
                 .build();
 
 
         path4B = follower.pathBuilder()
                 .addPath(new BezierLine(preShootPose, midShootPose))
-                .setConstantHeadingInterpolation(Math.toRadians(-136.8))
-                .setConstraints(FAST_CONSTRAINTS)
+                .setLinearHeadingInterpolation(preShootPose.getHeading(), Math.toRadians(-138))
+                .setConstraints(SLOW_CONSTRAINTS)
                 .build();
 
 
         path4C = follower.pathBuilder()
                 .addPath(new BezierLine(midShootPose, launchingPose))
-                .setConstantHeadingInterpolation(Math.toRadians(-136.8))
-                .setConstraints(SUPER_SLOW_CONSTRAINTS)
+                .setLinearHeadingInterpolation(midShootPose.getHeading(), Math.toRadians(-140))
+                .setConstraints(SLOW_CONSTRAINTS)
                 .build();
 
 
         path7A = follower.pathBuilder()
                 .addPath(new BezierLine(path6Pose, preShootPose))
-                .setLinearHeadingInterpolation(0, Math.toRadians(-136.8))
-                .setConstraints(FAST_CONSTRAINTS)
+                .setLinearHeadingInterpolation(path6Pose.getHeading(), Math.toRadians(-136.8))
+                .setConstraints(SUPER_SLOW_CONSTRAINTS)
                 .build();
 
 
         path7B = follower.pathBuilder()
                 .addPath(new BezierLine(preShootPose, midShootPose))
-                .setConstantHeadingInterpolation(Math.toRadians(-136.8))
-                .setConstraints(FAST_CONSTRAINTS)
+                .setLinearHeadingInterpolation(preShootPose.getHeading(), Math.toRadians(-138))
+                .setConstraints(SLOW_CONSTRAINTS)
                 .build();
 
 
         path7C = follower.pathBuilder()
                 .addPath(new BezierLine(midShootPose, launchingPose))
-                .setConstantHeadingInterpolation(Math.toRadians(-136.8))
-                .setConstraints(SUPER_SLOW_CONSTRAINTS)
+                .setLinearHeadingInterpolation(midShootPose.getHeading(), Math.toRadians(-140))
+                .setConstraints(SLOW_CONSTRAINTS)
                 .build();
     }
 }
