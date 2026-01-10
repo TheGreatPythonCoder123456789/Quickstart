@@ -61,10 +61,9 @@ public class RedGoal extends LinearOpMode {
     private final Pose startPose = new Pose(123, 122, Math.toRadians(-136));
 
 
-    private final Pose preShootPose = new Pose(86.45, 77.24, Math.toRadians(-136));   // moved 4 down
+    private final Pose preShootPose = new Pose(86.45, 77.24, Math.toRadians(-136.8));   // moved 4 down
     private final Pose midShootPose = new Pose(86.45, 86.84, Math.toRadians(-138));   // moved 4 down
     private final Pose launchingPose = new Pose(86.45, 89.84, Math.toRadians(-140));  // moved 4 down
-    private final Pose launchingPosePreLoad = new Pose(86.45, 89.84, Math.toRadians(-136));
 
 
     private final Pose row1ApproachPose = new Pose(92, 94, Math.toRadians(0)); //92 Y
@@ -534,22 +533,24 @@ public class RedGoal extends LinearOpMode {
 
     // ---------------- Build Paths ----------------
     private void buildPaths() {
+
+
         path1A = follower.pathBuilder()
-                .addPath(new BezierLine(startPose, launchingPosePreLoad))
+                .addPath(new BezierLine(startPose, preShootPose))
                 .setLinearHeadingInterpolation(startPose.getHeading(), Math.toRadians(-136.8))
                 .setConstraints(FAST_CONSTRAINTS)
                 .build();
 
 
         path1B = follower.pathBuilder()
-                .addPath(new BezierLine(launchingPosePreLoad, launchingPosePreLoad))
+                .addPath(new BezierLine(preShootPose, midShootPose))
                 .setLinearHeadingInterpolation(preShootPose.getHeading(), Math.toRadians(-138))
                 .setConstraints(SLOW_CONSTRAINTS)
                 .build();
 
 
         path1C = follower.pathBuilder()
-                .addPath(new BezierLine(launchingPosePreLoad, launchingPosePreLoad))
+                .addPath(new BezierLine(midShootPose, launchingPose))
                 .setLinearHeadingInterpolation(midShootPose.getHeading(), Math.toRadians(-140))
                 .setConstraints(SLOW_CONSTRAINTS)
                 .build();

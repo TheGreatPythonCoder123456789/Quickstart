@@ -11,7 +11,6 @@ import com.pedropathing.paths.PathChain;
 import com.pedropathing.paths.PathConstraints;
 import com.pedropathing.util.Timer;
 
-
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
