@@ -23,8 +23,9 @@ Notes: Basically:
 
 Competition Use Ones:
     -teleopHeadlessAndroidStudio
-    -AutoRedCrippled_BACKUP_SR (without heading fixer)
-    -AutoRedCrippled_OFFICIAL_SR (with heading fixer)
+    -AutoRedCrippled_BACKUP_SR (without heading fixer and named Official) [SR]
+    -Red_Test22222 [SR]
+    -HP autonomous (HP_Auton)
 
 pedroPathing:
     -constants

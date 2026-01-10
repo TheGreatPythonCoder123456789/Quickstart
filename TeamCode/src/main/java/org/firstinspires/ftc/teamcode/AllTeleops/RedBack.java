@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.AutoRedTests;
+package org.firstinspires.ftc.teamcode.AllTeleops;
 // remove intake approach poses and make them use old ones.
 // because problem is now bump under robot
 //should be best one if this works.
@@ -22,8 +22,8 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystem;
 
 
-@Autonomous(name = "Red Test NEW NEW NEW", group = "Autonomous")
-public class Red_Test22222 extends LinearOpMode {
+@Autonomous(name = "USE THIS red back SR", group = "Autonomous")
+public class RedBack extends LinearOpMode {
 
 
     // ---------------- State Machine ----------------
@@ -64,7 +64,6 @@ public class Red_Test22222 extends LinearOpMode {
     private final Pose preShootPose = new Pose(86.45, 77.24, Math.toRadians(-136.8));   // moved 4 down
     private final Pose midShootPose = new Pose(86.45, 86.84, Math.toRadians(-138));   // moved 4 down
     private final Pose launchingPose = new Pose(86.45, 89.84, Math.toRadians(-140));  // moved 4 down
-    private final Pose launchingPose2 = new Pose(86.45, 89.84, Math.toRadians(-142)); //SECOND ROW
 
 
     private final Pose row1ApproachPose = new Pose(92, 94, Math.toRadians(0)); //92 Y
@@ -588,7 +587,7 @@ public class Red_Test22222 extends LinearOpMode {
         path5 = follower.pathBuilder()
                 .addPath(new BezierLine(row2ApproachPose, path5Pose))
                 .setConstantHeadingInterpolation(0)
-                .setConstraints(SLOW_CONSTRAINTS)
+                .setConstraints(SUPER_SLOW_CONSTRAINTS)
                 .build();
 
 
