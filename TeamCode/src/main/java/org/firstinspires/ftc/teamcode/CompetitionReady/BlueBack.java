@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.AllTeleops;
+package org.firstinspires.ftc.teamcode.CompetitionReady;
 
 // remove intake approach poses and make them use old ones.
 // because problem is now bump under robot
@@ -20,8 +20,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystem;
 
-@Autonomous(name = "USE THIS blue goal SR", group = "Autonomous")
-public class BlueGoal extends LinearOpMode {
+@Autonomous(name = "USE THIS blue back SR", group = "Autonomous")
+public class BlueBack extends LinearOpMode {
 
     // ---------------- State Machine ----------------
     private enum AutoState {
@@ -52,7 +52,7 @@ public class BlueGoal extends LinearOpMode {
 
     // ---------------- Mirrored Poses ----------------
     // start heading NOT mirrored
-    private final Pose startPose = new Pose(21, 122, Math.toRadians(-43.2));
+    private final Pose startPose = new Pose(56, 9, Math.toRadians(270));
 
     private final Pose preShootPose  = new Pose(57.55, 77.24, Math.toRadians(-43.2));
     private final Pose midShootPose  = new Pose(57.55, 86.84, Math.toRadians(-42));
