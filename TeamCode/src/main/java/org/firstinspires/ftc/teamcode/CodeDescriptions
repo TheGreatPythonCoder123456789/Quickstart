@@ -1,5 +1,16 @@
 UPDATED on 1/3/2026 at 12:38 AM.
 ----------------------------------------------------------------------------------------------
+1/14/26 Notes:
+    -close shooting with new PID (DONE)
+    -far shooting with old PID (DONE)
+        -make it with new PID to be in the same teleop
+
+    -try to shoot last row of balls by decreasing wait time between balls and increasing intake speed (risky)
+        -separate OpMode
+
+    -Mirror BlueBack to others (when DONE)
+
+
 Notes: Basically:
 
     -test Crippled OFFICIAL and BACKUP to make sure they work
