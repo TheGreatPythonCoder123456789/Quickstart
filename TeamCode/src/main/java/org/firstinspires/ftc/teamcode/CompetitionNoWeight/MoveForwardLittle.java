@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.CompetitionReady;
+package org.firstinspires.ftc.teamcode.CompetitionNoWeight;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;

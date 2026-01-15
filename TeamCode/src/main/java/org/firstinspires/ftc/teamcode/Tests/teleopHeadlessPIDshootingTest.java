@@ -18,12 +18,12 @@ public class teleopHeadlessPIDshootingTest extends LinearOpMode {
     private ShooterSubsystem shooter;
 
     // PIDF tuning variables
-    private double currentP = 0;
-    private double currentD = 0;
+    private double currentP = 11.9;
+    private double currentD = 2.5;
 
     // Now independent F values (0.7 difference right 12.1 left 12.8) (right now: left: 12.6 right: 11.9)
-    private double currentFLeft = 12.90;
-    private double currentFRight = 12.90;
+    private double currentFLeft = 7;
+    private double currentFRight = 7.4;
 
     // Button edge tracking
     private boolean dpadUpPrev = false;
@@ -103,8 +103,8 @@ public class teleopHeadlessPIDshootingTest extends LinearOpMode {
         backRight.setPower(br);
 
         // ---------------- Intake ----------------
-        if (gamepad2.left_bumper) intakeTop.setPower(-1.0);
-        else if (gamepad2.right_bumper) intakeTop.setPower(1.0);
+        if (gamepad2.left_bumper) intakeTop.setPower(-0.6);
+        else if (gamepad2.right_bumper) intakeTop.setPower(0.6);
         else intakeTop.setPower(0);
 
         // ---------------- Shooter ----------------

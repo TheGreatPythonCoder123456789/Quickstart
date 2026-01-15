@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.CompetitionReady;
+package org.firstinspires.ftc.teamcode.CompetitionNoWeight;
 // remove intake approach poses and make them use old ones.
 // because problem is now bump under robot
 //should be best one if this works.

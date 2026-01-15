@@ -18,10 +18,10 @@ public class ShooterSubsystem {
     * private double baseFLeft = 12.95;
     * private double baseFRight = 12.75;
     */
-    private double baseP = 6.9;
-    private double baseD = 1.1;
-    private double baseFLeft = 12.3;
-    private double baseFRight = 11.7;
+    private double baseP = 14.2; //6.9
+    private double baseD = 2.9; //1.1
+    private double baseFLeft = 6.8; //12.3
+    private double baseFRight = 7.2; //11.7
 
     public ShooterSubsystem(HardwareMap hardwareMap) {
         shootLeft  = hardwareMap.get(DcMotorEx.class, "shootLeft");
