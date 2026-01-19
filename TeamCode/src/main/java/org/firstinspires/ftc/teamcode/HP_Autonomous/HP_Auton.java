@@ -14,7 +14,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystemCloseShooting;
 
 @Autonomous(name = "Red Human Player Auto", group = "Autonomous")
 public class HP_Auton extends LinearOpMode {
@@ -37,7 +37,7 @@ public class HP_Auton extends LinearOpMode {
     // ---------------- Hardware ----------------
     private DcMotor intakeTop;
     private DcMotor frontLeft, frontRight, backLeft, backRight;
-    private ShooterSubsystem shooter;
+    private ShooterSubsystemCloseShooting shooter;
     private Servo gate;
 
     // ---------------- Shooter Config ----------------
@@ -78,7 +78,7 @@ public class HP_Auton extends LinearOpMode {
         gate = hardwareMap.get(Servo.class, "gate");
         gate.setPosition(1.0);
 
-        shooter = new ShooterSubsystem(hardwareMap);
+        shooter = new ShooterSubsystemCloseShooting(hardwareMap);
 
         intakeTop.setPower(0);
         setDrivePower(0, 0, 0, 0);

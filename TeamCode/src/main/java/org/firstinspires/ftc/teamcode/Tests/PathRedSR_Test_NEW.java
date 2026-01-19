@@ -14,7 +14,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystemCloseShooting;
 
 @Autonomous(name = "PathRedSR_Test_NEW", group = "Autonomous")
 public class PathRedSR_Test_NEW extends LinearOpMode {
@@ -41,7 +41,7 @@ public class PathRedSR_Test_NEW extends LinearOpMode {
     private DcMotor intakeTop;
     private DcMotor frontLeft, frontRight, backLeft, backRight;
 
-    private ShooterSubsystem shooter;
+    private ShooterSubsystemCloseShooting shooter;
 
     // NEW: gate servo
     private Servo gate;
@@ -104,7 +104,7 @@ public class PathRedSR_Test_NEW extends LinearOpMode {
         gate.setPosition(1.0);
 
         intakeTop.setPower(0);
-        shooter = new ShooterSubsystem(hardwareMap);
+        shooter = new ShooterSubsystemCloseShooting(hardwareMap);
 
         setDrivePower(0, 0, 0, 0);
 

@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystemCloseShooting;
 
 @Autonomous(name = "BlueGoal_SR", group = "Autonomous")
 public class BlueGoal_SR extends LinearOpMode {
@@ -49,7 +49,7 @@ public class BlueGoal_SR extends LinearOpMode {
     private DcMotor intakeTop;
     private DcMotor frontLeft, frontRight, backLeft, backRight;
 
-    private ShooterSubsystem shooter;
+    private ShooterSubsystemCloseShooting shooter;
 
     // ---------------- POSES ----------------
     private final Pose startPose     = new Pose(21, 122, Math.toRadians(-44));
@@ -96,7 +96,7 @@ public class BlueGoal_SR extends LinearOpMode {
         backRight  = hardwareMap.get(DcMotor.class, "backRight");
 
         intakeTop.setPower(0);
-        shooter = new ShooterSubsystem(hardwareMap);
+        shooter = new ShooterSubsystemCloseShooting(hardwareMap);
 
         setDrivePower(0, 0, 0, 0);
 

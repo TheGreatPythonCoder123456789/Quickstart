@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.IMU;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystemCloseShooting;
 
 @TeleOp(name="Far shooting test TELEOP", group="TeleOp")
 public class teleopFarShootingTest extends LinearOpMode {
@@ -23,7 +23,7 @@ public class teleopFarShootingTest extends LinearOpMode {
     private IMU imu;
 
     // Shooter subsystem
-    private ShooterSubsystem shooter;
+    private ShooterSubsystemCloseShooting shooter;
 
     // Button state tracking
     boolean dpadUpPrevious = false;
@@ -58,7 +58,7 @@ public class teleopFarShootingTest extends LinearOpMode {
     @Override
     public void runOpMode() {
         initializeHardware();
-        shooter = new ShooterSubsystem(hardwareMap);
+        shooter = new ShooterSubsystemCloseShooting(hardwareMap);
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();

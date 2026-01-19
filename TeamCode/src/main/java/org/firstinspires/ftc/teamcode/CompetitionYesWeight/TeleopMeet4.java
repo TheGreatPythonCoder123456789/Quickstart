@@ -1,59 +1,50 @@
 package org.firstinspires.ftc.teamcode.CompetitionYesWeight;
 
-//for positioning robot make it on red tape by aligning it with
-// the right and left ends of the C channels (end of the C channels)
-
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.IMU;
+
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystemCloseShooting;
 
 @TeleOp(name="TeleopMeet4", group="TeleOp")
 public class TeleopMeet4 extends LinearOpMode {
 
-    private DcMotor frontLeft;
-    private DcMotor frontRight;
-    private DcMotor backLeft;
-    private DcMotor backRight;
+    private DcMotor frontLeft, frontRight, backLeft, backRight;
     private DcMotor intakeTop;
     private Servo gate;
     private IMU imu;
 
-    // Shooter subsystem
-    private ShooterSubsystem shooter;
+    private ShooterSubsystemCloseShooting shooter;
 
     // Button state tracking
     boolean dpadUpPrevious = false;
-    boolean yButtonPrevious = false;  // for headless toggle
-
-    // Gate button edge detection
+    boolean yButtonPrevious = false;
     boolean xPrev = false;
     boolean bPrev = false;
-
-    // Speed mode button edge detection
     boolean lbPrev = false;
     boolean rbPrev = false;
+    boolean dpadDownPrev = false;
+
+    // NEW: shooter PID mode toggle (close/far)
+    boolean shooterFarMode = false;
+    boolean dpadLeftPrev = false;
 
     boolean headlessEnabled = true;
     boolean gateOpen = false;
 
     double botHeading = 0.0;
-    double backNum = 90; //126 for wide (gate range for opening)
-
-    // NEW: speed divisor (default slow mode)
+    double backNum = 90;
     double speedDivisor = 1.8;
-
-    // Intake slow mode toggle
     boolean intakeSlowMode = false;
-    boolean dpadDownPrev = false;
 
     @Override
     public void runOpMode() {
+
         initializeHardware();
-        shooter = new ShooterSubsystem(hardwareMap);
+        shooter = new ShooterSubsystemCloseShooting(hardwareMap);
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -67,13 +58,13 @@ public class TeleopMeet4 extends LinearOpMode {
     }
 
     private void initializeHardware() {
-        frontLeft = hardwareMap.get(DcMotor.class, "frontLeft");
+        frontLeft  = hardwareMap.get(DcMotor.class, "frontLeft");
         frontRight = hardwareMap.get(DcMotor.class, "frontRight");
-        backLeft = hardwareMap.get(DcMotor.class, "backLeft");
-        backRight = hardwareMap.get(DcMotor.class, "backRight");
-        intakeTop = hardwareMap.get(DcMotor.class, "intakeTop");
-        gate = hardwareMap.get(Servo.class, "gate");
-        imu = hardwareMap.get(IMU.class, "imu");
+        backLeft   = hardwareMap.get(DcMotor.class, "backLeft");
+        backRight  = hardwareMap.get(DcMotor.class, "backRight");
+        intakeTop  = hardwareMap.get(DcMotor.class, "intakeTop");
+        gate       = hardwareMap.get(Servo.class, "gate");
+        imu        = hardwareMap.get(IMU.class, "imu");
 
         intakeTop.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
@@ -82,91 +73,67 @@ public class TeleopMeet4 extends LinearOpMode {
         backLeft.setDirection(DcMotor.Direction.REVERSE);
         backRight.setDirection(DcMotor.Direction.FORWARD);
 
-        double gateStartPos = gate.getPosition();   // read the servo’s actual physical position
-        gate.setPosition(gateStartPos);      // treat that as the new “1.0”
+        double gateStartPos = gate.getPosition();
+        gate.setPosition(gateStartPos);
     }
 
-    // ---------------------------------------------------------
-    //  COMBINED SHOOTING FUNCTION
-    // ---------------------------------------------------------
+    // Combined shooting sequence
     private void shootAllBalls() {
-
-        // Spin up shooter
-        shooter.setTargetRPM(2100);
+        shooter.setTargetRPM(2050);
         sleep(1500);
 
-        // Ball 1
         intakeTop.setPower(-1.0);
         sleep(300);
         intakeTop.setPower(0.5);
         sleep(700);
-
         intakeTop.setPower(0);
         sleep(300);
 
-        // Ball 2
         intakeTop.setPower(-1.0);
         sleep(500);
         intakeTop.setPower(0.5);
         sleep(700);
-
         intakeTop.setPower(0);
         sleep(300);
 
-        // Ball 3
         intakeTop.setPower(-1.0);
         sleep(800);
 
-        // Stop everything
         intakeTop.setPower(0);
         shooter.stopShooter();
     }
 
     private void servoSetter() {
         double currentPos = gate.getPosition();
-        double degreesBack = backNum;
-        double totalDegrees = 1800.0;
-
-        double positionChange = degreesBack / totalDegrees;
-        double newPos = currentPos - positionChange;
-
-        newPos = Math.max(0.0, Math.min(1.0, newPos));
+        double positionChange = backNum / 1800.0;
+        double newPos = Math.max(0.0, Math.min(1.0, currentPos - positionChange));
         gate.setPosition(newPos);
     }
 
     private void runTeleop() {
 
-        // ------------------ SPEED MODE TOGGLE ------------------
+        // ---------------- SPEED MODE ----------------
         boolean lbPressed = gamepad1.left_bumper && !lbPrev;
         boolean rbPressed = gamepad1.right_bumper && !rbPrev;
 
-        if (rbPressed) {
-            speedDivisor = 1.0;   // full speed
-        }
-
-        if (lbPressed) {
-            speedDivisor = 1.8;   // slow mode
-        }
+        if (rbPressed) speedDivisor = 1.0;
+        if (lbPressed) speedDivisor = 1.8;
 
         lbPrev = gamepad1.left_bumper;
         rbPrev = gamepad1.right_bumper;
 
-        // ------------------ DRIVETRAIN ------------------
-        double drive  = -gamepad1.left_stick_y / speedDivisor;
-        double strafe =  gamepad1.left_stick_x / speedDivisor;
-        double turn   =  gamepad1.right_stick_x;
+        // ---------------- DRIVETRAIN ----------------
+        double drive = -gamepad1.left_stick_y / speedDivisor;
+        double strafe = gamepad1.left_stick_x / speedDivisor;
+        double turn = gamepad1.right_stick_x;
 
         botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
         if (gamepad1.a) imu.resetYaw();
 
-        // Toggle headless mode
-        if (gamepad1.y && !yButtonPrevious) {
-            headlessEnabled = !headlessEnabled;
-        }
+        if (gamepad1.y && !yButtonPrevious) headlessEnabled = !headlessEnabled;
         yButtonPrevious = gamepad1.y;
 
-        // Apply headless transform
         if (headlessEnabled) {
             double rotX = strafe * Math.cos(-botHeading) - drive * Math.sin(-botHeading);
             double rotY = strafe * Math.sin(-botHeading) + drive * Math.cos(-botHeading);
@@ -174,63 +141,80 @@ public class TeleopMeet4 extends LinearOpMode {
             drive = rotY;
         }
 
-        double frontLeftPower  = drive + strafe + turn / 2;
+        double frontLeftPower = drive + strafe + turn / 2;
         double frontRightPower = drive - strafe - turn / 2;
-        double backLeftPower   = drive - strafe + turn / 2;
-        double backRightPower  = drive + strafe - turn / 2;
+        double backLeftPower = drive - strafe + turn / 2;
+        double backRightPower = drive + strafe - turn / 2;
 
         frontLeft.setPower(frontLeftPower);
         frontRight.setPower(frontRightPower);
         backLeft.setPower(backLeftPower);
         backRight.setPower(backRightPower);
 
-        // ------------------ INTAKE SLOW MODE TOGGLE ------------------
+        // ---------------- INTAKE SLOW MODE ----------------
         boolean dpadDownPressed = gamepad2.dpad_down && !dpadDownPrev;
-        if (dpadDownPressed) {
-            intakeSlowMode = !intakeSlowMode; // toggle slow mode
-        }
+        if (dpadDownPressed) intakeSlowMode = !intakeSlowMode;
         dpadDownPrev = gamepad2.dpad_down;
 
-        // ------------------ INTAKE ------------------
+        // ---------------- INTAKE ----------------
         double intakePower = 0.0;
+
         if (gamepad2.left_bumper) {
-            intakePower = intakeSlowMode ? -0.5 : -1.0; // Balls IN
+            intakePower = intakeSlowMode ? -0.5 : -1.0;
         } else if (gamepad2.right_bumper) {
-            intakePower = intakeSlowMode ? 0.5 : 1.0;   // Balls OUT
+            intakePower = intakeSlowMode ? 0.5 : 1.0;
         }
+
         intakeTop.setPower(intakePower);
 
-        // ------------------ SHOOTER ------------------
+        // ---------------- SHOOTER PID MODE TOGGLE (D-PAD LEFT) ----------------
+        boolean dpadLeftPressed = gamepad2.dpad_left && !dpadLeftPrev;
+
+        if (dpadLeftPressed) {
+            shooterFarMode = !shooterFarMode;
+
+            if (shooterFarMode) {
+                shooter.useFarPID();
+            } else {
+                shooter.useClosePID();
+            }
+        }
+
+        dpadLeftPrev = gamepad2.dpad_left;
+
+        // ---------------- SHOOTER RPM ----------------
         if (gamepad2.right_trigger > 0) {
-            shooter.setTargetRPM(2050);
+            shooter.setTargetRPM(2050); // SAME RPM for both modes
         } else {
             shooter.stopShooter();
         }
 
-        // ------------------ GATE TOGGLE ------------------
+        // ---------------- GATE ----------------
         boolean xPressed = gamepad2.x && !xPrev;
         boolean bPressed = gamepad2.b && !bPrev;
 
         if (xPressed) {
-            gate.setPosition(1.0);   // close
+            gate.setPosition(1.0);
             gateOpen = false;
         }
 
         if (bPressed) {
-            servoSetter();           // open
+            servoSetter();
             gateOpen = true;
         }
 
         xPrev = gamepad2.x;
         bPrev = gamepad2.b;
 
-        // ------------------ SHOOTING SEQUENCE ------------------
+        // ---------------- SHOOTING SEQUENCE ----------------
         if (gamepad2.dpad_up && !dpadUpPrevious) {
             shootAllBalls();
         }
+
         dpadUpPrevious = gamepad2.dpad_up;
 
-        // ------------------ TELEMETRY ------------------
+        // ---------------- TELEMETRY ----------------
+        telemetry.addData("Shooter Mode", shooterFarMode ? "FAR PID" : "CLOSE PID");
         telemetry.addData("Shooter Left Velocity", shooter.getLeftShooterVelocity());
         telemetry.addData("Shooter Right Velocity", shooter.getRightShooterVelocity());
         telemetry.addData("Intake Power", intakeTop.getPower());

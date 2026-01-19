@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystemCloseShooting;
 
 @Autonomous(name = "RedGoal_SR", group = "Autonomous")
 public class RedGoal_SR extends LinearOpMode {
@@ -49,7 +49,7 @@ public class RedGoal_SR extends LinearOpMode {
     private DcMotor intakeTop;
     private DcMotor frontLeft, frontRight, backLeft, backRight;
 
-    private ShooterSubsystem shooter;
+    private ShooterSubsystemCloseShooting shooter;
 
     // -------- POSES (MIRRORED FROM BLUEGOAL) --------
     // Blue start: (21, 122, -44°) → Red: (123, 122, -136°)
@@ -107,7 +107,7 @@ public class RedGoal_SR extends LinearOpMode {
         backRight  = hardwareMap.get(DcMotor.class, "backRight");
 
         intakeTop.setPower(0);
-        shooter = new ShooterSubsystem(hardwareMap);
+        shooter = new ShooterSubsystemCloseShooting(hardwareMap);
 
         setDrivePower(0, 0, 0, 0);
 

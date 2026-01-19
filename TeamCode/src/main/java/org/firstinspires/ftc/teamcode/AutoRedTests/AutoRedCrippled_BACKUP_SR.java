@@ -17,7 +17,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystemCloseShooting;
 
 
 @Autonomous(name = "AutoRedCrippled_OFFICIAL_SR", group = "Autonomous")
@@ -47,7 +47,7 @@ public class AutoRedCrippled_BACKUP_SR extends LinearOpMode {
     // ---------------- Hardware ----------------
     private DcMotor intakeTop;
     private DcMotor frontLeft, frontRight, backLeft, backRight;
-    private ShooterSubsystem shooter;
+    private ShooterSubsystemCloseShooting shooter;
     private Servo gate;
 
 
@@ -124,7 +124,7 @@ public class AutoRedCrippled_BACKUP_SR extends LinearOpMode {
         gate.setPosition(1.0);
 
 
-        shooter = new ShooterSubsystem(hardwareMap);
+        shooter = new ShooterSubsystemCloseShooting(hardwareMap);
 
 
         intakeTop.setPower(0);
