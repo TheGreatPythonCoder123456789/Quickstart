@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @Configurable
-@TeleOp(name = "Pedro + AprilTag TeleOp (WORKING)")
+@TeleOp(name = "? pedro teleop 1", group = "TeleOp")
 public class pedroteleop extends OpMode {
 
     /* ================= PEDRO ================= */
