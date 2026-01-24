@@ -5,8 +5,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-@TeleOp(name = "! AprilTagTest", group = "TeleOp")
-public class NegroTags extends LinearOpMode {
+@TeleOp(name = "April Tag backup", group = "collios")
+public class nig0er extends LinearOpMode {
 
     // ---------------- HARDWARE ----------------
     private DcMotor frontLeft, frontRight, backLeft, backRight;
@@ -27,12 +27,12 @@ public class NegroTags extends LinearOpMode {
     private static final double TARGET_HEADING = 0.0;  // deg
 
     // ---------------- THRESHOLDS ----------------
-    private static final double DIST_THRESHOLD = 1.0;  // inches
-    private static final double STRAFE_THRESHOLD = 1.0;
+    private static final double DIST_THRESHOLD = 5.0;  // inches
+    private static final double STRAFE_THRESHOLD = 6.0;
     private static final double HEADING_THRESHOLD = 3.0; // degrees
 
     // ---------------- CONTROL ----------------
-    private static final double MOTOR_POWER = 0.3;
+    private static final double MOTOR_POWER = 0.2;
 
     @Override
     public void runOpMode() {
@@ -101,7 +101,7 @@ public class NegroTags extends LinearOpMode {
                 } else if (!strafeGood) {
                     strafe = strafeError > 0 ? MOTOR_POWER : -MOTOR_POWER;
                 } else if (!forwardGood) {
-                    drive = forwardError > 0 ? MOTOR_POWER : -MOTOR_POWER;
+                    drive = forwardError < 0 ? MOTOR_POWER : -MOTOR_POWER;
                 }
 
                 // -------- TELEMETRY --------
@@ -110,6 +110,7 @@ public class NegroTags extends LinearOpMode {
                 telemetry.addData("Forward Error", "%.1f", forwardError);
                 telemetry.addData("Strafe Error", "%.1f", strafeError);
                 telemetry.addData("Heading Error (deg)", "%.1f", headingError);
+                telemetry.addData("Heading Error (deg)",headingGood);
                 telemetry.addData("Aligned",
                         headingGood && strafeGood && forwardGood);
 
