@@ -1,29 +1,24 @@
+/*
 package org.firstinspires.ftc.teamcode.subsystems;
+
 
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-public class ShooterSubsystem {
+public class ShooterSubsystemCloseShooting {
 
     private DcMotorEx shootLeft;
     private DcMotorEx shootRight;
 
     private static final int TICKS_PER_REV = 28;
 
-    // Default baseline values (can be overwritten by TeleOp tuning)
-    /*
-    * private double baseP = 5.4;
-    * private double baseD = 0.7;
-    * private double baseFLeft = 12.95;
-    * private double baseFRight = 12.75;
-    */
     private double baseP = 14.2; //6.9
     private double baseD = 2.9; //1.1
     private double baseFLeft = 6.8; //12.3
     private double baseFRight = 7.2; //11.7
 
-    public ShooterSubsystem(HardwareMap hardwareMap) {
+    public ShooterSubsystemCloseShooting(HardwareMap hardwareMap) {
         shootLeft  = hardwareMap.get(DcMotorEx.class, "shootLeft");
         shootRight = hardwareMap.get(DcMotorEx.class, "shootRight");
 
@@ -90,3 +85,5 @@ public class ShooterSubsystem {
     public double getP() { return baseP; }
     public double getD() { return baseD; }
 }
+
+ */

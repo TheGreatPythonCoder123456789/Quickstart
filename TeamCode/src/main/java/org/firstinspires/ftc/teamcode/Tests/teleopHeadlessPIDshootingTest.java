@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystemCloseShooting;
 
 @TeleOp(name="TEST_headlessAndroid_PID_SHOOTER", group="TeleOp")
 public class teleopHeadlessPIDshootingTest extends LinearOpMode {
@@ -15,7 +15,7 @@ public class teleopHeadlessPIDshootingTest extends LinearOpMode {
     private DcMotor intakeTop;
     private IMU imu;
 
-    private ShooterSubsystem shooter;
+    private ShooterSubsystemCloseShooting shooter;
 
     // PIDF tuning variables
     private double currentP = 11.9;
@@ -45,7 +45,7 @@ public class teleopHeadlessPIDshootingTest extends LinearOpMode {
     @Override
     public void runOpMode() {
         initHardware();
-        shooter = new ShooterSubsystem(hardwareMap);
+        shooter = new ShooterSubsystemCloseShooting(hardwareMap);
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();

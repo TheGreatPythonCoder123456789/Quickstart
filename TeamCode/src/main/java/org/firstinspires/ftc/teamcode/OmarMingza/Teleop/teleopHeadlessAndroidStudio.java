@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.CompetitionNoWeight;
+package org.firstinspires.ftc.teamcode.OmarMingza.Teleop;
 
 //for positioning robot make it on red tape by aligning it with
 // the right and left ends of the C channels (end of the C channels)
@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.IMU;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystemCloseShooting;
 
 @TeleOp(name="OFFICIAL_headlessAndroid", group="TeleOp")
 public class teleopHeadlessAndroidStudio extends LinearOpMode {
@@ -23,7 +23,7 @@ public class teleopHeadlessAndroidStudio extends LinearOpMode {
     private IMU imu;
 
     // Shooter subsystem
-    private ShooterSubsystem shooter;
+    private ShooterSubsystemCloseShooting shooter;
 
     // Button state tracking
     boolean dpadUpPrevious = false;
@@ -53,7 +53,7 @@ public class teleopHeadlessAndroidStudio extends LinearOpMode {
     @Override
     public void runOpMode() {
         initializeHardware();
-        shooter = new ShooterSubsystem(hardwareMap);
+        shooter = new ShooterSubsystemCloseShooting(hardwareMap);
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();

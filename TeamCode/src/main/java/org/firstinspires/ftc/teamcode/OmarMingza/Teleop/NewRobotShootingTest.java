@@ -1,18 +1,19 @@
-package org.firstinspires.ftc.teamcode.Tests;
+package org.firstinspires.ftc.teamcode.OmarMingza.Teleop;
 
 //for positioning robot make it on red tape by aligning it with
 // the right and left ends of the C channels (end of the C channels)
 
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.Servo;
+
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystemCloseShooting;
 
-@TeleOp(name="Far shooting test TELEOP", group="TeleOp")
-public class teleopFarShootingTest extends LinearOpMode {
+@TeleOp(name="! New Robot Shooting", group="TeleOp")
+public class NewRobotShootingTest extends LinearOpMode {
 
     private DcMotor frontLeft;
     private DcMotor frontRight;
@@ -50,10 +51,8 @@ public class teleopFarShootingTest extends LinearOpMode {
     boolean intakeSlowMode = false;
     boolean dpadDownPrev = false;
 
-    // ------------------ Adjustable Shooter RPM ------------------
-    int shooterRPM = 3100;  // starting RPM
-    boolean gp1DpadUpPrev = false;
-    boolean gp1DpadDownPrev = false;
+    double currentRPM = 3450; //new shooter
+    //for old shooter is 2050
 
     @Override
     public void runOpMode() {
@@ -205,21 +204,17 @@ public class teleopFarShootingTest extends LinearOpMode {
         }
         intakeTop.setPower(intakePower);
 
-        // ------------------ SHOOTER RPM ADJUSTMENT (GAMEPAD 1) ------------------
-        boolean gp1Up = gamepad1.dpad_up && !gp1DpadUpPrev;
-        boolean gp1Down = gamepad1.dpad_down && !gp1DpadDownPrev;
-
-        if (gp1Up) shooterRPM += 50;
-        if (gp1Down) shooterRPM -= 50;
-
-        shooterRPM = Math.max(500, Math.min(6000, shooterRPM));
-
-        gp1DpadUpPrev = gamepad1.dpad_up;
-        gp1DpadDownPrev = gamepad1.dpad_down;
-
         // ------------------ SHOOTER ------------------
-        if (gamepad2.right_trigger > 0) {
-            shooter.setTargetRPM(shooterRPM);
+        /*
+        if(gamepad1.x) {
+            currentRPM = currentRPM + 50;
+        }
+        if(gamepad1.b) {
+            currentRPM = currentRPM - 50;
+        }
+        */
+        if (gamepad1.b) { //gamepad2.right_trigger > 0
+            shooter.setTargetRPM(currentRPM);
         } else {
             shooter.stopShooter();
         }
@@ -250,7 +245,6 @@ public class teleopFarShootingTest extends LinearOpMode {
         // ------------------ TELEMETRY ------------------
         telemetry.addData("Shooter Left Velocity", shooter.getLeftShooterVelocity());
         telemetry.addData("Shooter Right Velocity", shooter.getRightShooterVelocity());
-        telemetry.addData("Shooter Target RPM", shooterRPM);
         telemetry.addData("Intake Power", intakeTop.getPower());
         telemetry.addData("Intake Mode", intakeSlowMode ? "SLOW" : "FULL");
         telemetry.addData("Gate Position", gateOpen ? "OPEN" : "CLOSED");
@@ -258,5 +252,6 @@ public class teleopFarShootingTest extends LinearOpMode {
         telemetry.addData("IMU Heading (Radians)", botHeading);
         telemetry.addData("Headless Mode", headlessEnabled ? "ON" : "OFF");
         telemetry.addData("Drive Speed Mode", speedDivisor == 1.0 ? "FULL" : "SLOW");
+        telemetry.addData("current RPM variable", currentRPM);
     }
 }
