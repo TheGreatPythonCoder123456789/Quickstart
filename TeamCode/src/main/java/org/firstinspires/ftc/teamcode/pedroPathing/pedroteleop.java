@@ -38,7 +38,7 @@ public class pedroteleop extends OpMode {
 
     // ⚠️ MEASURE THIS ON YOUR FIELD
     public static Pose TAG_5_POSE =
-            new Pose(16, 132, Math.toRadians(-38));
+            new Pose(16, 132, Math.toRadians(142)); //-38
 
     /* ================= STATE ================= */
     private enum TeleOpState {
@@ -150,6 +150,11 @@ public class pedroteleop extends OpMode {
         telemetryM.addData("Y", String.format("%.2f", p.getY()));
         telemetryM.addData("Heading (deg)",
                 String.format("%.2f", Math.toDegrees(p.getHeading())));
+
+        telemetryM.addData("Tag Heading (deg)",
+                String.format("%.2f",
+                        Math.toDegrees(TAG_5_POSE.getHeading())));
+
 
         telemetryM.update();
     }
