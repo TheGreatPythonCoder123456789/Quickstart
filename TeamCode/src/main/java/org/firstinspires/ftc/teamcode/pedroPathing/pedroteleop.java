@@ -34,7 +34,7 @@ public class pedroteleop extends OpMode {
             new Pose(0, 0, Math.toRadians(270));
 
     public static Pose LAUNCHING_POSE =
-            new Pose(144 - 57.55, 89.84, Math.toRadians(215));
+            new Pose( 58, 93, Math.toRadians(-38));
 
     // ⚠️ MEASURE THIS ON YOUR FIELD
     public static Pose TAG_5_POSE =
