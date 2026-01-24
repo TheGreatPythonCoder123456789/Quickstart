@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.OmarMingza.AprilTag;
+package org.firstinspires.ftc.teamcode.OmarMingza.WorkingAprilTag;
 //for positioning robot make it on red tape by alligning it with
 // the right and left ends of the C channels (end of the C channels)
 import com.qualcomm.hardware.dfrobot.HuskyLens;
@@ -7,12 +7,14 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.internal.system.Deadline;
 
 import java.util.concurrent.TimeUnit;
 
-@TeleOp(name="1/24 April Tag", group="Linear Opmode")
+@TeleOp(name="WORKING APRIL TAG", group="Linear Opmode")
 public class AprilTagTestGPT extends LinearOpMode {
     private DcMotor frontLeft;
     private DcMotor frontRight;
@@ -47,8 +49,12 @@ public class AprilTagTestGPT extends LinearOpMode {
 
     // ---------------- CONTROL ----------------
     private static final double MOTOR_POWER = 0.2;
-    private final int READ_PERIOD = 50;
+    private final int READ_PERIOD = 30;
     public boolean flaggg=false;
+
+    public PIDControllerSubsystem forwardPID;
+    public PIDControllerSubsystem strafePID;
+    public PIDControllerSubsystem headingPID;
 
 
     @Override
@@ -116,6 +122,10 @@ public class AprilTagTestGPT extends LinearOpMode {
         frontRight.setDirection(DcMotor.Direction.FORWARD);
         backLeft.setDirection(DcMotor.Direction.REVERSE);
         backRight.setDirection(DcMotor.Direction.FORWARD);
+        double kP=0.02;
+        forwardPID = new PIDControllerSubsystem(kP, 0.0, 0);
+        strafePID  = new PIDControllerSubsystem(kP, 0.0, 0);
+        headingPID = new PIDControllerSubsystem(0.03, 0.0, 0);
     }
     private void shootMechLast() {
 
@@ -139,6 +149,10 @@ public class AprilTagTestGPT extends LinearOpMode {
         }
         if(gamepad1.x){
             flaggg=true;
+
+            forwardPID.reset();
+            strafePID.reset();
+            headingPID.reset();
         }
 
         // Toggle headless mode with gamepad1.y button using its own state tracking
@@ -276,7 +290,7 @@ public class AprilTagTestGPT extends LinearOpMode {
         telemetry.addData("Back Right", backRight.getPower());
         telemetry.addData("IMU Heading (Radians)", botHeading);
         telemetry.addData("Headless Mode", headlessEnabled ? "ON" : "OFF");
-        telemetry.addData("Y Button State", gamepad1.y);
+        telemetry.addData("Y Button State", gamepad1.y); // Optional: Add this to see the button state in telemetry
         telemetry.update();
     }
     public boolean checkapril(int idd){
@@ -299,6 +313,11 @@ public class AprilTagTestGPT extends LinearOpMode {
         double drive = 0;
         double strafe = 0;
         double turn = 0;
+        double lastTime=0;
+        double[] powers={0,0,0};
+
+        ElapsedTime runtime = new ElapsedTime();
+        runtime.reset();
 
         if (tag != null) {
             // -------- DISTANCE ESTIMATION --------
@@ -320,18 +339,25 @@ public class AprilTagTestGPT extends LinearOpMode {
             boolean headingGood = Math.abs(headingError) < HEADING_THRESHOLD;
             boolean strafeGood  = Math.abs(strafeError)  < STRAFE_THRESHOLD;
             boolean forwardGood = Math.abs(forwardError) < DIST_THRESHOLD;
-
-            // -------- PRIORITY CONTROL --------
-            if (!headingGood) {
-                turn = headingError > 0 ? MOTOR_POWER : -MOTOR_POWER;
-            } else if (!strafeGood) {
-                strafe = strafeError > 0 ? MOTOR_POWER : -MOTOR_POWER;
-            } else if (!forwardGood) {
-                drive = forwardError < 0 ? MOTOR_POWER : -MOTOR_POWER;
+            if(forwardGood){
+                forwardError=0;
             }
-            else{
+            if(strafeGood){
+                strafeError=0;
+            }
+            if(headingGood){
+                headingError=0;
+            }
+            // -------- PRIORITY CONTROL --------
+
+            if(headingGood&&strafeGood&&forwardGood){
                 flaggg=false;
             }
+
+            double now = runtime.seconds();
+            double dt = now - lastTime;
+            lastTime = now;
+            powers = pidDrive(-forwardError, strafeError, headingError, dt);
 
             // -------- TELEMETRY --------
             telemetry.addData("Tag ID", tag.id);
@@ -349,6 +375,9 @@ public class AprilTagTestGPT extends LinearOpMode {
         if(gamepad1.x){
             flaggg=false;
         }
+        drive=powers[0];
+        strafe=powers[1];
+        turn=powers[2];
 
         // -------- MECANUM OUTPUT --------
         frontLeft.setPower(drive + strafe + turn);
@@ -359,5 +388,20 @@ public class AprilTagTestGPT extends LinearOpMode {
         telemetry.update();
 
     }
+    public double[] pidDrive(double forwardError, double strafeError, double headingError, double dt) {
 
+        double forwardPower = forwardPID.calculate(forwardError, dt);
+        double strafePower  = strafePID.calculate(strafeError, dt);
+        double turnPower    = headingPID.calculate(headingError, dt);
+
+        forwardPower = Math.max(-1, Math.min(1, forwardPower));
+        strafePower  = Math.max(-1, Math.min(1, strafePower));
+        turnPower    = Math.max(-1, Math.min(1, turnPower));
+
+        return new double[]{forwardPower, strafePower, turnPower};
+    }
 }
+
+
+
+
