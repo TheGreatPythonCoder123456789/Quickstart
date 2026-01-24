@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.CompetitionYesWeight;
+package org.firstinspires.ftc.teamcode.OmarMingza.Autonomous;
 
 // remove intake approach poses and make them use old ones.
 // because problem is now bump under robot

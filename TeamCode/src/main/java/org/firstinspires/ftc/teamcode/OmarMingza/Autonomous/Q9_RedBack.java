@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.CompetitionYesWeight;
+package org.firstinspires.ftc.teamcode.OmarMingza.Autonomous;
 
 // MIRRORED TO RED SIDE ACROSS Y AXIS
 // start heading intentionally NOT mirrored

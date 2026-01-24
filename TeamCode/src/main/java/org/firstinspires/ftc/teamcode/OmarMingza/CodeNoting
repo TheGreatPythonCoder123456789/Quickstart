@@ -1,0 +1,13 @@
+1/23/26 notes:
+    -opmodes using:
+        autonomous: BlueBackMeet4 (blue back), Q9_RedBack (red back), MoveLittleMeet4 (move a little forward)
+        teleop: teleopHeadlessAndroidStudio (official teleop)
+        April Tag: nig0er (backup), gggg (working one),
+                   AprilTagAuton (gggg {called new new new} integrated into auton)
+
+    tasks: add PID to wheels in april tag then add it to autonomous.
+           try pedro tracking in teleop with Teleop_PedroTracking_Test
+
+
+    OpModes: BlueBackMeet4 / Q9_RedBack / MoveLittleMeet4 || teleopHeadlessAndroidStudio ||
+             nig0er // gggg // AprilTagAuton || Teleop_PedroTracking_Test||
