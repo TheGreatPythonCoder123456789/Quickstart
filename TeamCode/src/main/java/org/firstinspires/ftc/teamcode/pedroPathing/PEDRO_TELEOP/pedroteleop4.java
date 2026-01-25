@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.pedroPathing;
+package org.firstinspires.ftc.teamcode.pedroPathing.PEDRO_TELEOP;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
@@ -14,8 +14,9 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystemCloseShooting;
-import org.firstinspires.ftc.teamcode.OmarMingza.WorkingAprilTag.PIDControllerSubsystem;
+import org.firstinspires.ftc.teamcode.OmarMingzaShazil.WorkingAprilTag.PIDControllerSubsystem;
 
 @TeleOp(name="? pedro teleop 4", group="TeleOp")
 public class pedroteleop4 extends LinearOpMode {

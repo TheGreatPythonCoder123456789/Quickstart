@@ -1,19 +1,18 @@
-package org.firstinspires.ftc.teamcode.OmarMingza.Teleop;
+package org.firstinspires.ftc.teamcode.OmarMingzaShazil.Teleop;
 
 //for positioning robot make it on red tape by aligning it with
 // the right and left ends of the C channels (end of the C channels)
 
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
-
+import com.qualcomm.robotcore.hardware.IMU;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystemCloseShooting;
 
-@TeleOp(name="! New Robot Shooting", group="TeleOp")
-public class NewRobotShootingTest extends LinearOpMode {
+@TeleOp(name="OFFICIAL_headlessAndroid", group="TeleOp")
+public class teleopHeadlessAndroidStudio extends LinearOpMode {
 
     private DcMotor frontLeft;
     private DcMotor frontRight;
@@ -50,9 +49,6 @@ public class NewRobotShootingTest extends LinearOpMode {
     // Intake slow mode toggle
     boolean intakeSlowMode = false;
     boolean dpadDownPrev = false;
-
-    double currentRPM = 3450; //new shooter
-    //for old shooter is 2050
 
     @Override
     public void runOpMode() {
@@ -205,16 +201,8 @@ public class NewRobotShootingTest extends LinearOpMode {
         intakeTop.setPower(intakePower);
 
         // ------------------ SHOOTER ------------------
-        /*
-        if(gamepad1.x) {
-            currentRPM = currentRPM + 50;
-        }
-        if(gamepad1.b) {
-            currentRPM = currentRPM - 50;
-        }
-        */
-        if (gamepad1.b) { //gamepad2.right_trigger > 0
-            shooter.setTargetRPM(currentRPM);
+        if (gamepad2.right_trigger > 0) {
+            shooter.setTargetRPM(2050);
         } else {
             shooter.stopShooter();
         }
@@ -252,6 +240,5 @@ public class NewRobotShootingTest extends LinearOpMode {
         telemetry.addData("IMU Heading (Radians)", botHeading);
         telemetry.addData("Headless Mode", headlessEnabled ? "ON" : "OFF");
         telemetry.addData("Drive Speed Mode", speedDivisor == 1.0 ? "FULL" : "SLOW");
-        telemetry.addData("current RPM variable", currentRPM);
     }
 }

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.OmarMingza.WorkingAprilTag;
+package org.firstinspires.ftc.teamcode.OmarMingzaShazil.WorkingAprilTag;
 //for positioning robot make it on red tape by alligning it with
 // the right and left ends of the C channels (end of the C channels)
 import com.qualcomm.hardware.dfrobot.HuskyLens;

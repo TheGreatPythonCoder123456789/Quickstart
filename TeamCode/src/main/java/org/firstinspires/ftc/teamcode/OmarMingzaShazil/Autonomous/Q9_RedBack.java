@@ -1,8 +1,7 @@
-package org.firstinspires.ftc.teamcode.OmarMingza.Autonomous;
+package org.firstinspires.ftc.teamcode.OmarMingzaShazil.Autonomous;
 
-// remove intake approach poses and make them use old ones.
-// because problem is now bump under robot
-//should be best one if this works.
+// MIRRORED TO RED SIDE ACROSS Y AXIS
+// start heading intentionally NOT mirrored
 
 // ---------------- Imports ----------------
 import com.pedropathing.follower.Follower;
@@ -20,8 +19,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystemCloseShooting;
 
-@Autonomous(name = "Blue Back Meet 4", group = "Autonomous")
-public class BlueBackMeet4 extends LinearOpMode {
+@Autonomous(name = "Q9_RedBack", group = "Autonomous")
+public class Q9_RedBack extends LinearOpMode {
 
     // ---------------- State Machine ----------------
     private enum AutoState {
@@ -50,26 +49,47 @@ public class BlueBackMeet4 extends LinearOpMode {
     // ---------------- Shooter Config ----------------
     private double backNum = 80;
 
-    // ---------------- Mirrored Poses ----------------
-    // start heading NOT mirrored
-    private final Pose startPose = new Pose(56, 9, Math.toRadians(270));
+    // ---------------- START POSE (heading NOT mirrored) ----------------
+    private final Pose startPose =
+            new Pose(144 - 56, 9, Math.toRadians(270));
 
-    private final Pose preShootPose  = new Pose(57.55, 77.24, Math.toRadians(-43.2)); //-43.2
-    private final Pose midShootPose  = new Pose(57.55, 86.84, Math.toRadians(-39)); //-42
-    private final Pose launchingPose = new Pose(57.55, 89.84, Math.toRadians(-35)); //-40
+    // ---------------- SHOOTING POSES (CORRECTLY MIRRORED) ----------------
+    private final Pose preShootPose =
+            new Pose(144 - 57.55, 77.24, Math.toRadians(223.2));
 
-    private final Pose row1ApproachPose = new Pose(52, 94, Math.toRadians(180));
-    private final Pose row2ApproachPose = new Pose(52, 70, Math.toRadians(180));
-    private final Pose row3ApproachPose = new Pose(52, 46, Math.toRadians(180));
+    private final Pose midShootPose =
+            new Pose(144 - 57.55, 86.84, Math.toRadians(219));
 
-    private final Pose path2Pose = new Pose(52, 84, Math.toRadians(180));
-    private final Pose path3Pose = new Pose(15, 84, Math.toRadians(180));
+    private final Pose launchingPose =
+            new Pose(144 - 57.55, 89.84, Math.toRadians(215));
 
-    private final Pose path5Pose = new Pose(52, 60, Math.toRadians(180));
-    private final Pose path6Pose = new Pose(9, 60, Math.toRadians(180));
+    // ---------------- INTAKE / TRAVEL POSES ----------------
+    private final Pose row1ApproachPose =
+            new Pose(144 - 52, 94, Math.toRadians(0));
 
-    private final Pose path8Pose = new Pose(52, 36, Math.toRadians(180));
-    private final Pose path9Pose = new Pose(9, 36, Math.toRadians(180));
+    private final Pose row2ApproachPose =
+            new Pose(144 - 52, 70, Math.toRadians(0));
+
+    private final Pose row3ApproachPose =
+            new Pose(144 - 52, 46, Math.toRadians(0));
+
+    private final Pose path2Pose =
+            new Pose(144 - 52, 84, Math.toRadians(0));
+
+    private final Pose path3Pose =
+            new Pose(144 - 15, 84, Math.toRadians(0));
+
+    private final Pose path5Pose =
+            new Pose(144 - 52, 60, Math.toRadians(0));
+
+    private final Pose path6Pose =
+            new Pose(144 - 9, 60, Math.toRadians(0));
+
+    private final Pose path8Pose =
+            new Pose(144 - 52, 36, Math.toRadians(0));
+
+    private final Pose path9Pose =
+            new Pose(144 - 9, 36, Math.toRadians(0));
 
     // ---------------- PathChains ----------------
     private PathChain path1A, path1B, path1C;
@@ -118,7 +138,6 @@ public class BlueBackMeet4 extends LinearOpMode {
         waitForStart();
         stateTimer.resetTimer();
 
-        // ---------------- Main Loop ----------------
         while (opModeIsActive() && currentState != AutoState.DONE) {
 
             follower.update();
@@ -341,8 +360,10 @@ public class BlueBackMeet4 extends LinearOpMode {
 
     private boolean pathComplete(Pose target) {
         Pose current = follower.getPose();
-        return Math.hypot(current.getX() - target.getX(),
-                current.getY() - target.getY()) < POSE_TOLERANCE;
+        return Math.hypot(
+                current.getX() - target.getX(),
+                current.getY() - target.getY()
+        ) < POSE_TOLERANCE;
     }
 
     // ---------------- Gate Servo ----------------
@@ -414,109 +435,109 @@ public class BlueBackMeet4 extends LinearOpMode {
 
         path1A = follower.pathBuilder()
                 .addPath(new BezierLine(startPose, preShootPose))
-                .setLinearHeadingInterpolation(startPose.getHeading(), preShootPose.getHeading()) //Math.toRadians(-43.2)
+                .setLinearHeadingInterpolation(startPose.getHeading(), preShootPose.getHeading())
                 .setConstraints(FAST_CONSTRAINTS)
                 .build();
 
         path1B = follower.pathBuilder()
                 .addPath(new BezierLine(preShootPose, midShootPose))
-                .setLinearHeadingInterpolation(preShootPose.getHeading(), midShootPose.getHeading()) //Math.toRadians(-42)
+                .setLinearHeadingInterpolation(preShootPose.getHeading(), midShootPose.getHeading())
                 .setConstraints(SLOW_CONSTRAINTS)
                 .build();
 
         path1C = follower.pathBuilder()
                 .addPath(new BezierLine(midShootPose, launchingPose))
-                .setLinearHeadingInterpolation(midShootPose.getHeading(), launchingPose.getHeading()) //Math.toRadians(-40)
+                .setLinearHeadingInterpolation(midShootPose.getHeading(), launchingPose.getHeading())
                 .setConstraints(SLOW_CONSTRAINTS)
                 .build();
 
         path2Approach = follower.pathBuilder()
                 .addPath(new BezierLine(launchingPose, row1ApproachPose))
-                .setLinearHeadingInterpolation(launchingPose.getHeading(), row1ApproachPose.getHeading()) //Math.toRadians(180)
+                .setLinearHeadingInterpolation(launchingPose.getHeading(), row1ApproachPose.getHeading())
                 .setConstraints(SLOW_CONSTRAINTS)
                 .build();
 
         path2 = follower.pathBuilder()
                 .addPath(new BezierLine(row1ApproachPose, path2Pose))
-                .setConstantHeadingInterpolation(Math.toRadians(180))
+                .setConstantHeadingInterpolation(Math.toRadians(0))
                 .setConstraints(SLOW_CONSTRAINTS)
                 .build();
 
         path3 = follower.pathBuilder()
                 .addPath(new BezierLine(path2Pose, path3Pose))
-                .setConstantHeadingInterpolation(Math.toRadians(180))
+                .setConstantHeadingInterpolation(Math.toRadians(0))
                 .setConstraints(SUPER_SLOW_CONSTRAINTS)
                 .build();
 
         path4A = follower.pathBuilder()
                 .addPath(new BezierLine(path3Pose, preShootPose))
-                .setLinearHeadingInterpolation(path3Pose.getHeading(), preShootPose.getHeading()) //Math.toRadians(-43.2)
+                .setLinearHeadingInterpolation(path3Pose.getHeading(), preShootPose.getHeading())
                 .setConstraints(SUPER_SLOW_CONSTRAINTS)
                 .build();
 
         path4B = follower.pathBuilder()
                 .addPath(new BezierLine(preShootPose, midShootPose))
-                .setLinearHeadingInterpolation(preShootPose.getHeading(), midShootPose.getHeading()) //Math.toRadians(-42)
+                .setLinearHeadingInterpolation(preShootPose.getHeading(), midShootPose.getHeading())
                 .setConstraints(SLOW_CONSTRAINTS)
                 .build();
 
         path4C = follower.pathBuilder()
                 .addPath(new BezierLine(midShootPose, launchingPose))
-                .setLinearHeadingInterpolation(midShootPose.getHeading(), launchingPose.getHeading()) //Math.toRadians(-40)
+                .setLinearHeadingInterpolation(midShootPose.getHeading(), launchingPose.getHeading())
                 .setConstraints(SLOW_CONSTRAINTS)
                 .build();
 
         path5Approach = follower.pathBuilder()
                 .addPath(new BezierLine(launchingPose, row2ApproachPose))
-                .setLinearHeadingInterpolation(launchingPose.getHeading(), Math.toRadians(180))
+                .setLinearHeadingInterpolation(launchingPose.getHeading(), Math.toRadians(0))
                 .setConstraints(SLOW_CONSTRAINTS)
                 .build();
 
         path5 = follower.pathBuilder()
                 .addPath(new BezierLine(row2ApproachPose, path5Pose))
-                .setConstantHeadingInterpolation(Math.toRadians(180))
+                .setConstantHeadingInterpolation(Math.toRadians(0))
                 .setConstraints(SUPER_SLOW_CONSTRAINTS)
                 .build();
 
         path6 = follower.pathBuilder()
                 .addPath(new BezierLine(path5Pose, path6Pose))
-                .setConstantHeadingInterpolation(Math.toRadians(180))
+                .setConstantHeadingInterpolation(Math.toRadians(0))
                 .setConstraints(SUPER_SLOW_CONSTRAINTS)
                 .build();
 
         path7A = follower.pathBuilder()
                 .addPath(new BezierLine(path6Pose, preShootPose))
-                .setLinearHeadingInterpolation(path6Pose.getHeading(), preShootPose.getHeading()) //Math.toRadians(-43.2)
+                .setLinearHeadingInterpolation(path6Pose.getHeading(), preShootPose.getHeading())
                 .setConstraints(SUPER_SLOW_CONSTRAINTS)
                 .build();
 
         path7B = follower.pathBuilder()
                 .addPath(new BezierLine(preShootPose, midShootPose))
-                .setLinearHeadingInterpolation(preShootPose.getHeading(), midShootPose.getHeading()) //Math.toRadians(-42)
+                .setLinearHeadingInterpolation(preShootPose.getHeading(), midShootPose.getHeading())
                 .setConstraints(SLOW_CONSTRAINTS)
                 .build();
 
         path7C = follower.pathBuilder()
                 .addPath(new BezierLine(midShootPose, launchingPose))
-                .setLinearHeadingInterpolation(midShootPose.getHeading(), launchingPose.getHeading()) //Math.toRadians(-40)
+                .setLinearHeadingInterpolation(midShootPose.getHeading(), launchingPose.getHeading())
                 .setConstraints(SLOW_CONSTRAINTS)
                 .build();
 
         path8Approach = follower.pathBuilder()
                 .addPath(new BezierLine(launchingPose, row3ApproachPose))
-                .setLinearHeadingInterpolation(launchingPose.getHeading(), Math.toRadians(180))
+                .setLinearHeadingInterpolation(launchingPose.getHeading(), Math.toRadians(0))
                 .setConstraints(SLOW_CONSTRAINTS)
                 .build();
 
         path8 = follower.pathBuilder()
                 .addPath(new BezierLine(row3ApproachPose, path8Pose))
-                .setConstantHeadingInterpolation(Math.toRadians(180))
+                .setConstantHeadingInterpolation(Math.toRadians(0))
                 .setConstraints(SLOW_CONSTRAINTS)
                 .build();
 
         path9 = follower.pathBuilder()
                 .addPath(new BezierLine(path8Pose, path9Pose))
-                .setConstantHeadingInterpolation(Math.toRadians(180))
+                .setConstantHeadingInterpolation(Math.toRadians(0))
                 .setConstraints(SUPER_SLOW_CONSTRAINTS)
                 .build();
     }

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.pedroPathing;
+package org.firstinspires.ftc.teamcode.pedroPathing.PEDRO_TELEOP;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
@@ -14,11 +14,12 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystemCloseShooting;
-import org.firstinspires.ftc.teamcode.OmarMingza.WorkingAprilTag.PIDControllerSubsystem;
+import org.firstinspires.ftc.teamcode.OmarMingzaShazil.WorkingAprilTag.PIDControllerSubsystem;
 
-@TeleOp(name="? pedro teleop 3", group="TeleOp")
-public class pedroteleop3 extends LinearOpMode {
+@TeleOp(name="? pedro teleop 5", group="TeleOp")
+public class pedroteleop5 extends LinearOpMode {
 
     // Hardware
     private DcMotor frontLeft, frontRight, backLeft, backRight, intakeTop;
@@ -45,7 +46,7 @@ public class pedroteleop3 extends LinearOpMode {
     private static final double CAMERA_Y_OFFSET = 0.5;  // right
 
     private static final double TARGET_FORWARD = 36.0;
-    private static final double TARGET_STRAFE = 5.0;
+    private static final double TARGET_STRAFE = -5.0;
     private static final double TARGET_HEADING = 0.0;
 
     private static final double DIST_THRESHOLD = 5.0;
@@ -58,7 +59,12 @@ public class pedroteleop3 extends LinearOpMode {
     private PIDControllerSubsystem headingPID;
 
     // State machine
-    private enum AssistState { MANUAL, GO_TO_LAUNCH_POSE, APRIL_ALIGN }
+    private enum AssistState {
+        MANUAL,
+        GO_TO_LAUNCH_POSE,
+        WAIT_FOR_TAG,
+        APRIL_ALIGN
+    }
     private AssistState assistState = AssistState.MANUAL;
 
     // Headless
@@ -67,6 +73,10 @@ public class pedroteleop3 extends LinearOpMode {
 
     // Button edge
     private boolean xPrev = false;
+
+    // AprilTag timing
+    private long tagSearchStartTime = 0;
+    private static final long TAG_SEARCH_TIMEOUT_MS = 1500;
 
     @Override
     public void runOpMode() {
@@ -109,15 +119,28 @@ public class pedroteleop3 extends LinearOpMode {
                     break;
 
                 case GO_TO_LAUNCH_POSE:
-                    // Must call update() every loop
                     follower.update();
 
-                    // Path complete
                     if (!follower.isBusy()) {
                         follower.breakFollowing();
                         stopDrive();
+                        tagSearchStartTime = System.currentTimeMillis();
+                        assistState = AssistState.WAIT_FOR_TAG;
+                    }
+                    break;
+
+                case WAIT_FOR_TAG:
+                    HuskyLens.Block tag = findApril(5);
+
+                    if (tag != null) {
                         resetAprilPID();
                         assistState = AssistState.APRIL_ALIGN;
+                    }
+                    else if (System.currentTimeMillis() - tagSearchStartTime > TAG_SEARCH_TIMEOUT_MS) {
+                        assistState = AssistState.MANUAL;
+                    }
+                    else {
+                        stopDrive();
                     }
                     break;
 
@@ -159,7 +182,6 @@ public class pedroteleop3 extends LinearOpMode {
         botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
         if (gamepad1.a) imu.resetYaw();
-
         if (gamepad1.y) headlessEnabled = !headlessEnabled;
 
         if (headlessEnabled) {
@@ -176,12 +198,10 @@ public class pedroteleop3 extends LinearOpMode {
                 drive + strafe - turn / 2
         );
 
-        // Intake control
         if (gamepad2.left_bumper) intakeTop.setPower(-1);
         else if (gamepad2.right_bumper) intakeTop.setPower(1);
         else intakeTop.setPower(0);
 
-        // Shooter control
         if (gamepad2.right_trigger > 0) shooter.setTargetRPM(2050);
         else shooter.stopShooter();
     }
@@ -203,7 +223,12 @@ public class pedroteleop3 extends LinearOpMode {
         goToLaunchPath = follower.pathBuilder()
                 .addPath(new BezierLine(current, launchingPose))
                 .setLinearHeadingInterpolation(current.getHeading(), launchingPose.getHeading())
-                .setConstraints(new PathConstraints(0.6, 8, 0.6, 0.6))
+                .setConstraints(new PathConstraints(
+                        0.69,
+                        9.2,
+                        0.69,
+                        0.69
+                ))
                 .build();
     }
 
@@ -225,8 +250,8 @@ public class pedroteleop3 extends LinearOpMode {
         HuskyLens.Block tag = findApril(5);
 
         if (tag == null) {
-            telemetry.addLine("Tag NOT FOUND");
             stopDrive();
+            assistState = AssistState.MANUAL;
             return;
         }
 
@@ -236,11 +261,8 @@ public class pedroteleop3 extends LinearOpMode {
 
         double forwardError = distanceToTag - TARGET_FORWARD - CAMERA_X_OFFSET;
 
-        // IMPORTANT: camera faces BACK of robot
-        // so x error must be inverted for strafe
         double strafeError =
                 ((tag.x - CAMERA_RES_X / 2.0) * CAMERA_FOV_X / CAMERA_RES_X);
-
         strafeError = -(TARGET_STRAFE + CAMERA_Y_OFFSET) - strafeError;
 
         double headingError =
@@ -256,7 +278,7 @@ public class pedroteleop3 extends LinearOpMode {
             return;
         }
 
-        double dt = 0.03; // fixed dt for simplicity
+        double dt = 0.03;
         double[] powers = pidDrive(-forwardError, strafeError, headingError, dt);
 
         setDrivePower(
@@ -265,11 +287,6 @@ public class pedroteleop3 extends LinearOpMode {
                 powers[0] - powers[1] + powers[2],
                 powers[0] + powers[1] - powers[2]
         );
-
-        telemetry.addData("Distance", distanceToTag);
-        telemetry.addData("Forward Error", forwardError);
-        telemetry.addData("Strafe Error", strafeError);
-        telemetry.addData("Heading Error", headingError);
     }
 
     private double[] pidDrive(double forwardError, double strafeError, double headingError, double dt) {
