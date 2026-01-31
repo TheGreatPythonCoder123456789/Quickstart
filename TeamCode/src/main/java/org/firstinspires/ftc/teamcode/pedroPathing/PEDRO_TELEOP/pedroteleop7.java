@@ -4,7 +4,6 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
-import com.pedropathing.paths.PathConstraints;
 
 import com.qualcomm.hardware.dfrobot.HuskyLens;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -18,7 +17,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystemCloseShooting;
 import org.firstinspires.ftc.teamcode.OmarMingzaShazil.WorkingAprilTag.PIDControllerSubsystem;
 
-@TeleOp(name = "? pedro teleop 7 TEST", group = "TeleOp")
+@TeleOp(name = "pedro teleop 7 FULL FIX", group = "TeleOp")
 public class pedroteleop7 extends LinearOpMode {
 
     /* ================= HARDWARE ================= */
@@ -38,18 +37,6 @@ public class pedroteleop7 extends LinearOpMode {
     private final Pose startPose = new Pose(0, 0, Math.toRadians(270));
     private final Pose launchingPose = new Pose(57.55, 89.84, Math.toRadians(-35));
 
-    /* ================= WHITE TRIANGLE ================= */
-
-    private static final Pose[] WHITE_TRIANGLE = new Pose[]{
-            new Pose(15, 128, 0),
-            new Pose(25, 144, 0),
-            new Pose(84, 144, 0),
-            new Pose(84, 83, 0),
-            new Pose(72, 72, 0)
-    };
-
-    private static final double TRANSLATION_LOCK_RADIUS = 4.0;
-
     /* ================= APRIL TAG ================= */
 
     private static final double CAMERA_FOV_X = 50.0;
@@ -64,13 +51,13 @@ public class pedroteleop7 extends LinearOpMode {
 
     private static final double DIST_THRESHOLD = 5.0;
     private static final double STRAFE_THRESHOLD = 6.0;
-    private static final double HEADING_THRESHOLD = 3.0;
 
     /* ================= PID ================= */
 
     private PIDControllerSubsystem forwardPID;
     private PIDControllerSubsystem strafePID;
-    private PIDControllerSubsystem headingPID;
+
+    private long lastPIDTime = 0;
 
     /* ================= STATE ================= */
 
@@ -83,19 +70,13 @@ public class pedroteleop7 extends LinearOpMode {
 
     private AssistState assistState = AssistState.MANUAL;
 
-    /* ================= TELEMETRY RPM ================= */
+    /* ================= MANUAL OVERRIDE TRACKING ================= */
 
-    private static final double TICKS_PER_REV = 537.7;
-
-    private long lastTime;
-    private double lastFL, lastFR, lastBL, lastBR, lastIntake;
-
-    double RPM_value = 2050;
+    private boolean robotWasManuallyDriven = false;
 
     /* ================= HEADLESS ================= */
 
     private boolean headlessEnabled = true;
-    private double botHeading = 0;
     private boolean xPrev = false;
 
     private long tagSearchStartTime = 0;
@@ -113,17 +94,13 @@ public class pedroteleop7 extends LinearOpMode {
 
         forwardPID = new PIDControllerSubsystem(0.02, 0, 0);
         strafePID  = new PIDControllerSubsystem(0.02, 0, 0);
-        headingPID = new PIDControllerSubsystem(0.03, 0, 0);
-
-        lastTime = System.nanoTime();
 
         waitForStart();
 
         while (opModeIsActive()) {
 
-            updateTelemetry();
-
-            if (gamepad1.b && assistState != AssistState.MANUAL) {
+            /* ===== CANCEL ASSIST ===== */
+            if (gamepad1.b) {
                 follower.breakFollowing();
                 assistState = AssistState.MANUAL;
                 stopDrive();
@@ -132,7 +109,8 @@ public class pedroteleop7 extends LinearOpMode {
             boolean xPressed = gamepad1.x && !xPrev;
             xPrev = gamepad1.x;
 
-            if (xPressed && assistState == AssistState.MANUAL) {
+            /* ===== START PEDRO ONLY IF POSE IS TRUSTED ===== */
+            if (xPressed && assistState == AssistState.MANUAL && !robotWasManuallyDriven) {
                 buildPathFromCurrentPose();
                 follower.followPath(goToLaunchPath, false);
                 assistState = AssistState.GO_TO_LAUNCH_POSE;
@@ -149,6 +127,7 @@ public class pedroteleop7 extends LinearOpMode {
                     if (!follower.isBusy()) {
                         follower.breakFollowing();
                         stopDrive();
+                        robotWasManuallyDriven = false; // pose is now trusted again
                         tagSearchStartTime = System.currentTimeMillis();
                         assistState = AssistState.WAIT_FOR_TAG;
                     }
@@ -156,12 +135,12 @@ public class pedroteleop7 extends LinearOpMode {
 
                 case WAIT_FOR_TAG:
                     if (findApril(5) != null) {
-                        resetAprilPID();
+                        forwardPID.reset();
+                        strafePID.reset();
+                        lastPIDTime = System.nanoTime();
                         assistState = AssistState.APRIL_ALIGN;
                     } else if (System.currentTimeMillis() - tagSearchStartTime > TAG_SEARCH_TIMEOUT_MS) {
                         assistState = AssistState.MANUAL;
-                    } else {
-                        stopDrive();
                     }
                     break;
 
@@ -170,11 +149,14 @@ public class pedroteleop7 extends LinearOpMode {
                     break;
             }
 
+            telemetry.addData("Assist State", assistState);
+            telemetry.addData("Pose Trusted", !robotWasManuallyDriven);
+            telemetry.addData("Headless", headlessEnabled);
             telemetry.update();
         }
     }
 
-    /* ================= TELEOP ================= */
+    /* ================= MANUAL ================= */
 
     private void runManualTeleop() {
 
@@ -182,7 +164,11 @@ public class pedroteleop7 extends LinearOpMode {
         double strafe =  gamepad1.left_stick_x / 1.8;
         double turn   =  gamepad1.right_stick_x;
 
-        botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+        if (Math.abs(drive) > 0.05 || Math.abs(strafe) > 0.05 || Math.abs(turn) > 0.05) {
+            robotWasManuallyDriven = true;
+        }
+
+        double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
         if (gamepad1.a) imu.resetYaw();
         if (gamepad1.y) headlessEnabled = !headlessEnabled;
@@ -205,18 +191,19 @@ public class pedroteleop7 extends LinearOpMode {
         else if (gamepad2.right_bumper) intakeTop.setPower(1);
         else intakeTop.setPower(0);
 
-        if (gamepad2.right_trigger > 0) shooter.setTargetRPM(RPM_value);
+        if (gamepad2.right_trigger > 0) shooter.setTargetRPM(2050);
         else shooter.stopShooter();
     }
 
-    /* ================= APRIL TAG ================= */
+    /* ================= APRIL TAG ALIGN ================= */
 
     private void regulateAprilTag() {
 
         HuskyLens.Block tag = findApril(5);
+
         if (tag == null) {
-            stopDrive();
-            assistState = AssistState.MANUAL;
+            // slow rotate to search
+            setDrivePower(0.15, -0.15, 0.15, -0.15);
             return;
         }
 
@@ -230,106 +217,27 @@ public class pedroteleop7 extends LinearOpMode {
                 ((tag.x - CAMERA_RES_X / 2.0) * CAMERA_FOV_X / CAMERA_RES_X);
         strafeError = -(TARGET_STRAFE + CAMERA_Y_OFFSET) - strafeError;
 
-        double headingError =
-                (tag.x - CAMERA_RES_X / 2.0) * CAMERA_FOV_X / CAMERA_RES_X;
-
         if (Math.abs(forwardError) < DIST_THRESHOLD) forwardError = 0;
         if (Math.abs(strafeError) < STRAFE_THRESHOLD) strafeError = 0;
-        if (Math.abs(headingError) < HEADING_THRESHOLD) headingError = 0;
 
-        Pose p = follower.getPose();
-
-        if (nearLaunchPose() || !isInsideWhiteTriangle(p)) {
-            forwardError = 0;
-            strafeError = 0;
+        if (forwardError == 0 && strafeError == 0) {
+            stopDrive();
+            return;
         }
-
-        double[] powers = pidDrive(-forwardError, strafeError, headingError, 0.03);
-
-        setDrivePower(
-                powers[0] + powers[1] + powers[2],
-                powers[0] - powers[1] - powers[2],
-                powers[0] - powers[1] + powers[2],
-                powers[0] + powers[1] - powers[2]
-        );
-    }
-
-    /* ================= TELEMETRY ================= */
-
-    private void updateTelemetry() {
 
         long now = System.nanoTime();
-        double dt = (now - lastTime) / 1e9;
+        double dt = (now - lastPIDTime) / 1e9;
+        lastPIDTime = now;
 
-        double fl = frontLeft.getCurrentPosition();
-        double fr = frontRight.getCurrentPosition();
-        double bl = backLeft.getCurrentPosition();
-        double br = backRight.getCurrentPosition();
-        double in = intakeTop.getCurrentPosition();
+        double f = clamp(forwardPID.calculate(-forwardError, dt));
+        double s = clamp(strafePID.calculate(strafeError, dt));
 
-        double flRPM = ((fl - lastFL) / TICKS_PER_REV) / dt * 60;
-        double frRPM = ((fr - lastFR) / TICKS_PER_REV) / dt * 60;
-        double blRPM = ((bl - lastBL) / TICKS_PER_REV) / dt * 60;
-        double brRPM = ((br - lastBR) / TICKS_PER_REV) / dt * 60;
-        double intakeRPM = ((in - lastIntake) / TICKS_PER_REV) / dt * 60;
-
-        lastFL = fl;
-        lastFR = fr;
-        lastBL = bl;
-        lastBR = br;
-        lastIntake = in;
-        lastTime = now;
-
-        Pose p = follower.getPose();
-        double distToLaunch = Math.hypot(
-                p.getX() - launchingPose.getX(),
-                p.getY() - launchingPose.getY()
+        setDrivePower(
+                f + s,
+                f - s,
+                f - s,
+                f + s
         );
-
-        HuskyLens.Block tag = findApril(5);
-
-        telemetry.addLine("===== STATE =====");
-        telemetry.addData("Assist State", assistState);
-        telemetry.addData("Headless", headlessEnabled);
-
-        telemetry.addLine("\n===== DRIVETRAIN RPM =====");
-        telemetry.addData("FL", "%.1f", flRPM);
-        telemetry.addData("FR", "%.1f", frRPM);
-        telemetry.addData("BL", "%.1f", blRPM);
-        telemetry.addData("BR", "%.1f", brRPM);
-
-        telemetry.addLine("\n===== SHOOTER =====");
-        telemetry.addLine("Shooter Target: " + RPM_value);
-        telemetry.addData("Current RPM", shooter.getLeftShooterVelocity());
-
-        telemetry.addLine("\n===== INTAKE =====");
-        telemetry.addData("RPM", "%.1f", intakeRPM);
-
-        telemetry.addLine("\n===== GATE =====");
-        telemetry.addData("Position", gate.getPosition());
-        telemetry.addData("Status", gate.getPosition() > 0.5 ? "OPEN" : "CLOSED");
-
-        telemetry.addLine("\n===== POSE =====");
-        telemetry.addData("X", "%.2f", p.getX());
-        telemetry.addData("Y", "%.2f", p.getY());
-        telemetry.addData("Heading", "%.1f", Math.toDegrees(p.getHeading()));
-
-        telemetry.addLine("\n===== LAUNCH POSE =====");
-        telemetry.addData("X", launchingPose.getX());
-        telemetry.addData("Y", launchingPose.getY());
-        telemetry.addData("Heading", Math.toDegrees(launchingPose.getHeading()));
-        telemetry.addData("Dist", "%.2f", distToLaunch);
-        telemetry.addData("Near Launch", nearLaunchPose());
-
-        telemetry.addLine("\n===== WHITE TRIANGLE =====");
-        telemetry.addData("Inside", isInsideWhiteTriangle(p));
-
-        telemetry.addLine("\n===== APRIL TAG =====");
-        telemetry.addData("Detected", tag != null);
-        if (tag != null) {
-            telemetry.addData("Tag X", tag.x);
-            telemetry.addData("Tag Width", tag.width);
-        }
     }
 
     /* ================= HELPERS ================= */
@@ -352,8 +260,6 @@ public class pedroteleop7 extends LinearOpMode {
 
         frontLeft.setDirection(DcMotor.Direction.REVERSE);
         backLeft.setDirection(DcMotor.Direction.REVERSE);
-
-        intakeTop.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
     private void buildPathFromCurrentPose() {
@@ -361,39 +267,7 @@ public class pedroteleop7 extends LinearOpMode {
         goToLaunchPath = follower.pathBuilder()
                 .addPath(new BezierLine(current, launchingPose))
                 .setLinearHeadingInterpolation(current.getHeading(), launchingPose.getHeading())
-                .setConstraints(new PathConstraints(0.69, 9.2, 0.69, 0.69))
                 .build();
-    }
-
-    private boolean nearLaunchPose() {
-        Pose p = follower.getPose();
-        return Math.hypot(
-                p.getX() - launchingPose.getX(),
-                p.getY() - launchingPose.getY()
-        ) < TRANSLATION_LOCK_RADIUS;
-    }
-
-    private boolean isInsideWhiteTriangle(Pose p) {
-        boolean inside = false;
-        for (int i = 0, j = WHITE_TRIANGLE.length - 1; i < WHITE_TRIANGLE.length; j = i++) {
-            double xi = WHITE_TRIANGLE[i].getX();
-            double yi = WHITE_TRIANGLE[i].getY();
-            double xj = WHITE_TRIANGLE[j].getX();
-            double yj = WHITE_TRIANGLE[j].getY();
-
-            boolean intersect =
-                    ((yi > p.getY()) != (yj > p.getY())) &&
-                            (p.getX() < (xj - xi) * (p.getY() - yi) / (yj - yi) + xi);
-
-            if (intersect) inside = !inside;
-        }
-        return inside;
-    }
-
-    private void resetAprilPID() {
-        forwardPID.reset();
-        strafePID.reset();
-        headingPID.reset();
     }
 
     private HuskyLens.Block findApril(int id) {
@@ -401,14 +275,6 @@ public class pedroteleop7 extends LinearOpMode {
             if (b.id == id) return b;
         }
         return null;
-    }
-
-    private double[] pidDrive(double f, double s, double h, double dt) {
-        return new double[]{
-                clamp(forwardPID.calculate(f, dt)),
-                clamp(strafePID.calculate(s, dt)),
-                clamp(headingPID.calculate(h, dt))
-        };
     }
 
     private double clamp(double v) {
