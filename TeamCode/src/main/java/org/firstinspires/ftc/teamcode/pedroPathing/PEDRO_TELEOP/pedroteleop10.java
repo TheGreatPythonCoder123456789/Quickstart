@@ -1,5 +1,5 @@
 package org.firstinspires.ftc.teamcode.pedroPathing.PEDRO_TELEOP;
-
+// add shooting controls
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
@@ -17,8 +17,8 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystemCloseShooting;
 import org.firstinspires.ftc.teamcode.subsystems.PIDControllerSubsystem;
 
-@TeleOp(name = "pedro teleop 9", group = "TeleOp")
-public class pedroteleop9 extends LinearOpMode {
+@TeleOp(name = "pedro teleop 10", group = "TeleOp")
+public class pedroteleop10 extends LinearOpMode {
 
     /* ================= HARDWARE ================= */
 
@@ -37,7 +37,19 @@ public class pedroteleop9 extends LinearOpMode {
     private final Pose startPose = new Pose(0, 0, Math.toRadians(270));
     private final Pose launchingPose = new Pose(57.55, 89.84, Math.toRadians(-35));
 
-    /* ================= APRIL TAG CAMERA ================= */
+    /* ================= TOLERANCES (LOCAL) ================= */
+
+    private double xTol, yTol, headingTol;
+
+    private static final double PATH_X_TOL = 1.0;
+    private static final double PATH_Y_TOL = 1.0;
+    private static final double PATH_HEADING_TOL = Math.toRadians(2.0);
+
+    private static final double MANUAL_X_TOL = 2.0;
+    private static final double MANUAL_Y_TOL = 2.0;
+    private static final double MANUAL_HEADING_TOL = Math.toRadians(6.0);
+
+    /* ================= APRIL TAG ================= */
 
     private static final double CAMERA_FOV_X = 50.0;
     private static final int CAMERA_RES_X = 320;
@@ -72,20 +84,18 @@ public class pedroteleop9 extends LinearOpMode {
 
     private AssistState assistState = AssistState.MANUAL;
 
-    /* ================= HEADLESS ================= */
+    /* ================= INPUT ================= */
 
     private boolean headlessEnabled = true;
     private boolean xPrev = false;
+    private boolean bPrev = false;
 
     private long tagSearchStartTime = 0;
     private static final long TAG_SEARCH_TIMEOUT_MS = 2000;
 
-    // Gate Servo
-    boolean gateOpen = false;
-    double backNum = 90; //126 for wide (gate range for opening)
-    boolean bPrev = false;
+    /* ================= GATE ================= */
 
-    /* ================= OPMODE ================= */
+    private double backNum = 90;
 
     @Override
     public void runOpMode() {
@@ -95,6 +105,8 @@ public class pedroteleop9 extends LinearOpMode {
         follower = Constants.createFollower(hardwareMap);
         follower.setPose(startPose);
 
+        setPoseTolerance(MANUAL_X_TOL, MANUAL_Y_TOL, MANUAL_HEADING_TOL);
+
         forwardPID = new PIDControllerSubsystem(0.03, 0, 0.00001);
         strafePID  = new PIDControllerSubsystem(0.03, 0, 0.00001);
         headingPID = new PIDControllerSubsystem(0.03, 0, 0.00001);
@@ -103,12 +115,11 @@ public class pedroteleop9 extends LinearOpMode {
 
         while (opModeIsActive()) {
 
-            /* ===== PEDRO MUST ALWAYS UPDATE ===== */
             follower.update();
 
-            /* ===== CANCEL ASSIST ===== */
             if (gamepad1.b) {
                 follower.breakFollowing();
+                setPoseTolerance(MANUAL_X_TOL, MANUAL_Y_TOL, MANUAL_HEADING_TOL);
                 assistState = AssistState.MANUAL;
                 stopDrive();
             }
@@ -116,8 +127,8 @@ public class pedroteleop9 extends LinearOpMode {
             boolean xPressed = gamepad1.x && !xPrev;
             xPrev = gamepad1.x;
 
-            /* ===== START ASSIST ===== */
             if (xPressed && assistState == AssistState.MANUAL) {
+                setPoseTolerance(PATH_X_TOL, PATH_Y_TOL, PATH_HEADING_TOL);
                 buildPathFromCurrentPose();
                 follower.followPath(goToLaunchPath, false);
                 assistState = AssistState.GO_TO_LAUNCH_POSE;
@@ -155,15 +166,12 @@ public class pedroteleop9 extends LinearOpMode {
                     break;
             }
 
-            Pose p = follower.getPose();
-            telemetry.addData("Assist State", assistState);
-            telemetry.addData("Pose", "x %.1f  y %.1f  h %.1f°",
-                    p.getX(), p.getY(), Math.toDegrees(p.getHeading()));
+            telemetry.addData("Assist", assistState);
             telemetry.update();
         }
     }
 
-    /* ================= MANUAL TELEOP ================= */
+    /* ================= MANUAL ================= */
 
     private void runManualTeleop() {
 
@@ -171,14 +179,14 @@ public class pedroteleop9 extends LinearOpMode {
         double strafe =  gamepad1.left_stick_x / 1.8;
         double turn   =  gamepad1.right_stick_x;
 
-        double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+        double heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
         if (gamepad1.a) imu.resetYaw();
         if (gamepad1.y) headlessEnabled = !headlessEnabled;
 
         if (headlessEnabled) {
-            double rotX = strafe * Math.cos(-botHeading) - drive * Math.sin(-botHeading);
-            double rotY = strafe * Math.sin(-botHeading) + drive * Math.cos(-botHeading);
+            double rotX = strafe * Math.cos(-heading) - drive * Math.sin(-heading);
+            double rotY = strafe * Math.sin(-heading) + drive * Math.cos(-heading);
             strafe = rotX;
             drive = rotY;
         }
@@ -189,32 +197,9 @@ public class pedroteleop9 extends LinearOpMode {
                 drive - strafe + turn / 2,
                 drive + strafe - turn / 2
         );
-
-        if (gamepad2.left_bumper) intakeTop.setPower(-1);
-        else if (gamepad2.right_bumper) intakeTop.setPower(1);
-        else intakeTop.setPower(0);
-
-        if (gamepad2.right_trigger > 0) shooter.setTargetRPM(2050);
-        else shooter.stopShooter();
-
-        boolean xPressed = gamepad2.x && !xPrev;
-        boolean bPressed = gamepad2.b && !bPrev;
-
-        if (xPressed) {
-            gate.setPosition(1.0);   // close
-            gateOpen = false;
-        }
-
-        if (bPressed) {
-            servoSetter();           // open
-            gateOpen = true;
-        }
-
-        xPrev = gamepad2.x;
-        bPrev = gamepad2.b;
     }
 
-    /* ================= APRIL TAG ALIGN (GOOD VERSION) ================= */
+    /* ================= APRIL TAG ================= */
 
     private void regulateAprilTag() {
 
@@ -225,29 +210,17 @@ public class pedroteleop9 extends LinearOpMode {
             return;
         }
 
-        double distanceToTag =
+        double distance =
                 (REAL_TAG_WIDTH * CAMERA_RES_X) /
                         (2.0 * tag.width * Math.tan(Math.toRadians(CAMERA_FOV_X / 2.0)));
 
-        double forwardError =
-                distanceToTag - TARGET_FORWARD - CAMERA_X_OFFSET;
-
-        double strafeError =
-                (tag.x - CAMERA_RES_X / 2.0) * CAMERA_FOV_X / CAMERA_RES_X;
-        strafeError = -(TARGET_STRAFE + CAMERA_Y_OFFSET);
-
+        double forwardError = distance - TARGET_FORWARD - CAMERA_X_OFFSET;
         double headingError =
                 (tag.x - CAMERA_RES_X / 2.0) * CAMERA_FOV_X / CAMERA_RES_X;
 
-        boolean forwardGood = Math.abs(forwardError) < DIST_THRESHOLD;
-        boolean strafeGood  = Math.abs(strafeError)  < STRAFE_THRESHOLD;
-        boolean headingGood = Math.abs(headingError) < HEADING_THRESHOLD;
+        if (Math.abs(forwardError) < DIST_THRESHOLD &&
+                Math.abs(headingError) < HEADING_THRESHOLD) {
 
-        if (forwardGood) forwardError = 0;
-        if (strafeGood)  strafeError  = 0;
-        if (headingGood) headingError = 0;
-
-        if (forwardGood && strafeGood && headingGood) {
             stopDrive();
             assistState = AssistState.MANUAL;
             return;
@@ -258,21 +231,23 @@ public class pedroteleop9 extends LinearOpMode {
         lastPIDTime = now;
 
         double f = clamp(forwardPID.calculate(-forwardError, dt));
-        double s = clamp(strafePID.calculate(strafeError, dt));
         double t = clamp(headingPID.calculate(headingError, dt));
 
         setDrivePower(
-                f + s + t,
-                f - s - t,
-                f - s + t,
-                f + s - t
+                f + t,
+                f - t,
+                f + t,
+                f - t
         );
-
-        telemetry.addData("AprilTag", "LOCKED");
-        telemetry.addData("Distance", "%.1f", distanceToTag);
     }
 
     /* ================= HELPERS ================= */
+
+    private void setPoseTolerance(double x, double y, double h) {
+        xTol = x;
+        yTol = y;
+        headingTol = h;
+    }
 
     private void initHardware() {
 
@@ -292,28 +267,15 @@ public class pedroteleop9 extends LinearOpMode {
 
         frontLeft.setDirection(DcMotor.Direction.REVERSE);
         backLeft.setDirection(DcMotor.Direction.REVERSE);
-
-        double gateStartPos = gate.getPosition();   // read the servo’s actual physical position
-        gate.setPosition(gateStartPos);      // treat that as the new “1.0”
-    }
-
-    private void servoSetter() {
-        double currentPos = gate.getPosition();
-        double degreesBack = backNum;
-        double totalDegrees = 1800.0;
-
-        double positionChange = degreesBack / totalDegrees;
-        double newPos = currentPos - positionChange;
-
-        newPos = Math.max(0.0, Math.min(1.0, newPos));
-        gate.setPosition(newPos);
     }
 
     private void buildPathFromCurrentPose() {
         Pose current = follower.getPose();
         goToLaunchPath = follower.pathBuilder()
                 .addPath(new BezierLine(current, launchingPose))
-                .setLinearHeadingInterpolation(current.getHeading(), launchingPose.getHeading())
+                .setLinearHeadingInterpolation(
+                        current.getHeading(),
+                        launchingPose.getHeading())
                 .build();
     }
 
@@ -325,7 +287,7 @@ public class pedroteleop9 extends LinearOpMode {
     }
 
     private double clamp(double v) {
-        return Math.max(-1, Math.min(1, v));
+        return Math.max(-1.0, Math.min(1.0, v));
     }
 
     private void stopDrive() {

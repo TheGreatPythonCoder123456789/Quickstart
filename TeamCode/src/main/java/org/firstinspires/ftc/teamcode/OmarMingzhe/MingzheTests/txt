@@ -17,8 +17,8 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystemCloseShooting;
 import org.firstinspires.ftc.teamcode.subsystems.PIDControllerSubsystem;
 
-@TeleOp(name = "pedro teleop 9", group = "TeleOp")
-public class pedroteleop9 extends LinearOpMode {
+@TeleOp(name = "txt test", group = "TeleOp")
+public class pedroteleop10 extends LinearOpMode {
 
     /* ================= HARDWARE ================= */
 
@@ -51,7 +51,7 @@ public class pedroteleop9 extends LinearOpMode {
 
     private static final double DIST_THRESHOLD = 5.0;
     private static final double STRAFE_THRESHOLD = 6.0;
-    private static final double HEADING_THRESHOLD = 3.0;
+    private static final double HEADING_THRESHOLD = Math.toRadians(3.5);
 
     /* ================= PID ================= */
 
@@ -60,6 +60,9 @@ public class pedroteleop9 extends LinearOpMode {
     private PIDControllerSubsystem headingPID;
 
     private long lastPIDTime = 0;
+
+
+    private static final double Heading_TOLERANCE = 3.5;
 
     /* ================= STATE ================= */
 
@@ -80,9 +83,10 @@ public class pedroteleop9 extends LinearOpMode {
     private long tagSearchStartTime = 0;
     private static final long TAG_SEARCH_TIMEOUT_MS = 2000;
 
-    // Gate Servo
+    /* ================= GATE ================= */
+
     boolean gateOpen = false;
-    double backNum = 90; //126 for wide (gate range for opening)
+    double backNum = 90;
     boolean bPrev = false;
 
     /* ================= OPMODE ================= */
@@ -103,10 +107,9 @@ public class pedroteleop9 extends LinearOpMode {
 
         while (opModeIsActive()) {
 
-            /* ===== PEDRO MUST ALWAYS UPDATE ===== */
             follower.update();
+            follower.setPose();
 
-            /* ===== CANCEL ASSIST ===== */
             if (gamepad1.b) {
                 follower.breakFollowing();
                 assistState = AssistState.MANUAL;
@@ -116,7 +119,6 @@ public class pedroteleop9 extends LinearOpMode {
             boolean xPressed = gamepad1.x && !xPrev;
             xPrev = gamepad1.x;
 
-            /* ===== START ASSIST ===== */
             if (xPressed && assistState == AssistState.MANUAL) {
                 buildPathFromCurrentPose();
                 follower.followPath(goToLaunchPath, false);
@@ -139,6 +141,8 @@ public class pedroteleop9 extends LinearOpMode {
                     break;
 
                 case WAIT_FOR_TAG:
+                    telemetry.addData("asdadsSSS",123);
+                    telemetry.update();
                     if (findApril(5) != null) {
                         forwardPID.reset();
                         strafePID.reset();
@@ -155,10 +159,40 @@ public class pedroteleop9 extends LinearOpMode {
                     break;
             }
 
+            /* ================= TELEMETRY ================= */
+
             Pose p = follower.getPose();
+
+            telemetry.addLine("===== ASSIST / PEDRO =====");
             telemetry.addData("Assist State", assistState);
-            telemetry.addData("Pose", "x %.1f  y %.1f  h %.1f°",
+            telemetry.addData("Pose",
+                    "x %.1f  y %.1f  h %.1f°",
                     p.getX(), p.getY(), Math.toDegrees(p.getHeading()));
+
+            telemetry.addLine("\n===== DRIVETRAIN =====");
+            telemetry.addData("FL / FR", "%.2f  %.2f",
+                    frontLeft.getPower(), frontRight.getPower());
+            telemetry.addData("BL / BR", "%.2f  %.2f",
+                    backLeft.getPower(), backRight.getPower());
+
+            telemetry.addLine("\n===== IMU =====");
+            telemetry.addData("Heading (rad)",
+                    imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
+            telemetry.addData("Headless", headlessEnabled ? "ON" : "OFF");
+
+            telemetry.addLine("\n===== INTAKE =====");
+            telemetry.addData("Intake Power", intakeTop.getPower());
+
+            telemetry.addLine("\n===== SHOOTER =====");
+            telemetry.addData("Left Velocity", shooter.getLeftShooterVelocity());
+            telemetry.addData("Right Velocity", shooter.getRightShooterVelocity());
+
+            telemetry.addLine("\n===== GATE =====");
+            telemetry.addData("Gate State", gateOpen ? "OPEN" : "CLOSED");
+            telemetry.addData("Gate Raw Pos", gate.getPosition());
+
+            telemetry.addData("TargetHeading",Math.toDegrees(launchingPose.getHeading()) );
+
             telemetry.update();
         }
     }
@@ -201,12 +235,12 @@ public class pedroteleop9 extends LinearOpMode {
         boolean bPressed = gamepad2.b && !bPrev;
 
         if (xPressed) {
-            gate.setPosition(1.0);   // close
+            gate.setPosition(1.0);
             gateOpen = false;
         }
 
         if (bPressed) {
-            servoSetter();           // open
+            servoSetter();
             gateOpen = true;
         }
 
@@ -214,7 +248,7 @@ public class pedroteleop9 extends LinearOpMode {
         bPrev = gamepad2.b;
     }
 
-    /* ================= APRIL TAG ALIGN (GOOD VERSION) ================= */
+    /* ================= APRIL TAG ALIGN ================= */
 
     private void regulateAprilTag() {
 
@@ -222,6 +256,7 @@ public class pedroteleop9 extends LinearOpMode {
 
         if (tag == null) {
             setDrivePower(0.12, -0.12, 0.12, -0.12);
+            telemetry.addLine("AprilTag: SEARCHING");
             return;
         }
 
@@ -229,25 +264,16 @@ public class pedroteleop9 extends LinearOpMode {
                 (REAL_TAG_WIDTH * CAMERA_RES_X) /
                         (2.0 * tag.width * Math.tan(Math.toRadians(CAMERA_FOV_X / 2.0)));
 
-        double forwardError =
-                distanceToTag - TARGET_FORWARD - CAMERA_X_OFFSET;
-
-        double strafeError =
-                (tag.x - CAMERA_RES_X / 2.0) * CAMERA_FOV_X / CAMERA_RES_X;
-        strafeError = -(TARGET_STRAFE + CAMERA_Y_OFFSET);
-
+        double forwardError = distanceToTag - TARGET_FORWARD - CAMERA_X_OFFSET;
+        double strafeError = -(TARGET_STRAFE + CAMERA_Y_OFFSET);
         double headingError =
                 (tag.x - CAMERA_RES_X / 2.0) * CAMERA_FOV_X / CAMERA_RES_X;
 
-        boolean forwardGood = Math.abs(forwardError) < DIST_THRESHOLD;
-        boolean strafeGood  = Math.abs(strafeError)  < STRAFE_THRESHOLD;
-        boolean headingGood = Math.abs(headingError) < HEADING_THRESHOLD;
+        if (Math.abs(forwardError) < DIST_THRESHOLD) forwardError = 0;
+        if (Math.abs(strafeError) < STRAFE_THRESHOLD) strafeError = 0;
+        if (Math.abs(headingError) < HEADING_THRESHOLD) headingError = 0;
 
-        if (forwardGood) forwardError = 0;
-        if (strafeGood)  strafeError  = 0;
-        if (headingGood) headingError = 0;
-
-        if (forwardGood && strafeGood && headingGood) {
+        if (forwardError == 0 && strafeError == 0 && headingError == 0) {
             stopDrive();
             assistState = AssistState.MANUAL;
             return;
@@ -268,8 +294,11 @@ public class pedroteleop9 extends LinearOpMode {
                 f + s - t
         );
 
-        telemetry.addData("AprilTag", "LOCKED");
-        telemetry.addData("Distance", "%.1f", distanceToTag);
+        telemetry.addLine("\n===== APRIL TAG =====");
+        telemetry.addData("Tag ID", tag.id);
+        telemetry.addData("Distance (in)", "%.1f", distanceToTag);
+        telemetry.addData("Errors (F/S/H)", "%.1f  %.1f  %.1f",
+                forwardError, strafeError, headingError);
     }
 
     /* ================= HELPERS ================= */
@@ -293,20 +322,12 @@ public class pedroteleop9 extends LinearOpMode {
         frontLeft.setDirection(DcMotor.Direction.REVERSE);
         backLeft.setDirection(DcMotor.Direction.REVERSE);
 
-        double gateStartPos = gate.getPosition();   // read the servo’s actual physical position
-        gate.setPosition(gateStartPos);      // treat that as the new “1.0”
+        gate.setPosition(gate.getPosition());
     }
 
     private void servoSetter() {
-        double currentPos = gate.getPosition();
-        double degreesBack = backNum;
-        double totalDegrees = 1800.0;
-
-        double positionChange = degreesBack / totalDegrees;
-        double newPos = currentPos - positionChange;
-
-        newPos = Math.max(0.0, Math.min(1.0, newPos));
-        gate.setPosition(newPos);
+        double newPos = gate.getPosition() - (backNum / 1800.0);
+        gate.setPosition(Math.max(0.0, Math.min(1.0, newPos)));
     }
 
     private void buildPathFromCurrentPose() {
@@ -337,5 +358,16 @@ public class pedroteleop9 extends LinearOpMode {
         frontRight.setPower(rf);
         backLeft.setPower(lb);
         backRight.setPower(rb);
+    }
+    private boolean pathComplete(Pose target) {
+
+        double currentHeading = follower.getPose().getHeading();
+        double targetHeading  = target.getHeading();
+
+        double headingError = AngleUnit.normalizeRadians(
+                currentHeading - targetHeading
+        );
+
+        return Math.abs(headingError) < Heading_TOLERANCE;
     }
 }

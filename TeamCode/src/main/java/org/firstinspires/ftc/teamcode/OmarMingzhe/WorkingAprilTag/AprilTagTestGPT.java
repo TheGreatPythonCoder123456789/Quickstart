@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.OmarMingzaShazil.AprilTagTests;
+package org.firstinspires.ftc.teamcode.OmarMingzhe.WorkingAprilTag;
 //for positioning robot make it on red tape by alligning it with
 // the right and left ends of the C channels (end of the C channels)
 import com.qualcomm.hardware.dfrobot.HuskyLens;
@@ -7,10 +7,16 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.IMU;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
-@TeleOp(name="newww", group="Linear Opmode")
-public class gggg extends LinearOpMode {
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.internal.system.Deadline;
+import org.firstinspires.ftc.teamcode.subsystems.PIDControllerSubsystem;
+
+import java.util.concurrent.TimeUnit;
+
+@TeleOp(name="mingza is cool", group="Linear Opmode")
+public class AprilTagTestGPT extends LinearOpMode {
     private DcMotor frontLeft;
     private DcMotor frontRight;
     private DcMotor backLeft;
@@ -44,6 +50,12 @@ public class gggg extends LinearOpMode {
 
     // ---------------- CONTROL ----------------
     private static final double MOTOR_POWER = 0.2;
+    private final int READ_PERIOD = 30;
+    public boolean flaggg=false;
+
+    public PIDControllerSubsystem forwardPID;
+    public PIDControllerSubsystem strafePID;
+    public PIDControllerSubsystem headingPID;
 
 
     @Override
@@ -58,6 +70,10 @@ public class gggg extends LinearOpMode {
 
         // Main loop
         while (opModeIsActive()) {
+            if(flaggg){
+                regulate();
+                continue;
+            }
             runTeleop();
             telemetry.update();
         }
@@ -69,6 +85,9 @@ public class gggg extends LinearOpMode {
     boolean headlessEnabled = true; // Toggle for headless mode
     double botHeading = 0.0; // Store current heading in radians
 
+    double lastTime;
+    ElapsedTime runtime;
+
     private void initializeHardware() {
         // Map drive motors
         frontLeft = hardwareMap.get(DcMotor.class, "frontLeft");
@@ -78,6 +97,10 @@ public class gggg extends LinearOpMode {
 
         huskyLens = hardwareMap.get(HuskyLens.class, "huskylens");
         huskyLens.selectAlgorithm(HuskyLens.Algorithm.TAG_RECOGNITION);
+
+        Deadline rateLimit = new Deadline(READ_PERIOD, TimeUnit.MILLISECONDS);
+
+        rateLimit.expire();
 
         // Map mechanism motors
         intakeTop = hardwareMap.get(DcMotor.class, "intakeTop");
@@ -103,6 +126,14 @@ public class gggg extends LinearOpMode {
         frontRight.setDirection(DcMotor.Direction.FORWARD);
         backLeft.setDirection(DcMotor.Direction.REVERSE);
         backRight.setDirection(DcMotor.Direction.FORWARD);
+        double kP=0.03,kD=0.00001;
+//        double kP=0;
+        forwardPID = new PIDControllerSubsystem(kP, 0.0, kD);
+        strafePID  = new PIDControllerSubsystem(kP, 0.0, kD);
+        headingPID = new PIDControllerSubsystem(0.03, 0.0, kD);
+
+
+        runtime = new ElapsedTime();
     }
     private void shootMechLast() {
 
@@ -111,11 +142,11 @@ public class gggg extends LinearOpMode {
 
     }
     private void runTeleop() {
+
         // Get joystick input
         double drive = -gamepad1.left_stick_y / 1.5; // Forward/backward
         double strafe = gamepad1.left_stick_x / 1.5; // strafe Left/right
         double turn  = gamepad1.right_stick_x; // Turn left/right
-
         //Headless mode:
         // Read current robot heading from IMU
         botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
@@ -125,7 +156,12 @@ public class gggg extends LinearOpMode {
             imu.resetYaw();
         }
         if(gamepad1.x){
-            regulate();
+            flaggg=true;
+            runtime.reset();
+            lastTime=0;
+            forwardPID.reset();
+            strafePID.reset();
+            headingPID.reset();
         }
 
         // Toggle headless mode with gamepad1.y button using its own state tracking
@@ -280,80 +316,93 @@ public class gggg extends LinearOpMode {
         return null;
     }
     public void regulate(){
-        int count=0;
-        while (1+1==2) {
-            HuskyLens.Block tag = null;
-            tag=findApril(5);
+        HuskyLens.Block tag = null;
+        tag=findApril(5);
 
-            double drive = 0;
-            double strafe = 0;
-            double turn = 0;
+        double drive = 0;
+        double strafe = 0;
+        double turn = 0;
+        double[] powers={0,0,0};
 
-            if (tag != null) {
-                count=0;
-                // -------- DISTANCE ESTIMATION --------
-                double distanceToTag =
-                        (REAL_TAG_WIDTH * CAMERA_RES_X) /
-                                (2.0 * tag.width * Math.tan(Math.toRadians(CAMERA_FOV_X / 2.0)));
+        if (tag != null) {
+            // -------- DISTANCE ESTIMATION --------
+            double distanceToTag =
+                    (REAL_TAG_WIDTH * CAMERA_RES_X) /
+                            (2.0 * tag.width * Math.tan(Math.toRadians(CAMERA_FOV_X / 2.0)));
 
-                // -------- ERRORS --------
-                double forwardError =
-                        distanceToTag - TARGET_FORWARD - CAMERA_X_OFFSET;
+            // -------- ERRORS --------
+            double forwardError =
+                    distanceToTag - TARGET_FORWARD - CAMERA_X_OFFSET;
 
-                double strafeError =
-                        (tag.x - CAMERA_RES_X / 2.0) * CAMERA_FOV_X / CAMERA_RES_X;
-                strafeError = -(TARGET_STRAFE + CAMERA_Y_OFFSET);
+            double strafeError =
+                    (tag.x - CAMERA_RES_X / 2.0) * CAMERA_FOV_X / CAMERA_RES_X;
+            strafeError = -(TARGET_STRAFE + CAMERA_Y_OFFSET);
 
-                double headingError =
-                        (tag.x - CAMERA_RES_X / 2.0) * CAMERA_FOV_X / CAMERA_RES_X;
+            double headingError =
+                    (tag.x - CAMERA_RES_X / 2.0) * CAMERA_FOV_X / CAMERA_RES_X;
 
-                boolean headingGood = Math.abs(headingError) < HEADING_THRESHOLD;
-                boolean strafeGood  = Math.abs(strafeError)  < STRAFE_THRESHOLD;
-                boolean forwardGood = Math.abs(forwardError) < DIST_THRESHOLD;
-
-                // -------- PRIORITY CONTROL --------
-                if (!headingGood) {
-                    turn = headingError > 0 ? MOTOR_POWER : -MOTOR_POWER;
-                } else if (!strafeGood) {
-                    strafe = strafeError > 0 ? MOTOR_POWER : -MOTOR_POWER;
-                } else if (!forwardGood) {
-                    drive = forwardError < 0 ? MOTOR_POWER : -MOTOR_POWER;
-                }
-                else{
-                    break;
-                }
-
-                // -------- TELEMETRY --------
-                telemetry.addData("Tag ID", tag.id);
-                telemetry.addData("Distance (in)", "%.1f", distanceToTag);
-                telemetry.addData("Forward Error", "%.1f", forwardError);
-                telemetry.addData("Strafe Error", "%.1f", strafeError);
-                telemetry.addData("Heading Error (deg)", "%.1f", headingError);
-                telemetry.addData("Heading Error (deg)",headingGood);
-                telemetry.addData("Aligned",
-                        headingGood && strafeGood && forwardGood);
-
-            } else {
-                count++;
-                telemetry.addLine("Tag 5 NOT FOUND");
-//                if(count>=100){
-//                    break;
-
-//                }
+            boolean headingGood = Math.abs(headingError) < HEADING_THRESHOLD;
+            boolean strafeGood  = Math.abs(strafeError)  < STRAFE_THRESHOLD;
+            boolean forwardGood = Math.abs(forwardError) < DIST_THRESHOLD;
+            if(forwardGood){
+                forwardError=0;
             }
-            if(gamepad1.x){
-                break;
+            if(strafeGood){
+                strafeError=0;
+            }
+            if(headingGood){
+                headingError=0;
+            }
+            // -------- PRIORITY CONTROL --------
+
+            if(headingGood&&strafeGood&&forwardGood){
+                flaggg=false;
             }
 
-            // -------- MECANUM OUTPUT --------
-            frontLeft.setPower(drive + strafe + turn);
-            frontRight.setPower(drive - strafe - turn);
-            backLeft.setPower(drive - strafe + turn);
-            backRight.setPower(drive + strafe - turn);
+            double now = runtime.seconds();
+            double dt = now - lastTime;
+            lastTime = now;
+            powers = pidDrive(-forwardError, strafeError, headingError, dt);
 
-            telemetry.update();
+            // -------- TELEMETRY --------
+            telemetry.addData("Tag ID", tag.id);
+            telemetry.addData("Distance (in)", "%.1f", distanceToTag);
+            telemetry.addData("Forward Error", "%.1f", forwardError);
+            telemetry.addData("Strafe Error", "%.1f", strafeError);
+            telemetry.addData("Heading Error (deg)", "%.1f", headingError);
+            telemetry.addData("Heading Error (deg)",headingGood);
+            telemetry.addData("Aligned",
+                    headingGood && strafeGood && forwardGood);
+
+        } else {
+            telemetry.addLine("Tag 5 NOT FOUND");
         }
+        if(gamepad1.b){
+            flaggg=false;
+        }
+        drive=powers[0];
+        strafe=powers[1];
+        turn=powers[2];
+
+        // -------- MECANUM OUTPUT --------
+        frontLeft.setPower(drive + strafe + turn);
+        frontRight.setPower(drive - strafe - turn);
+        backLeft.setPower(drive - strafe + turn);
+        backRight.setPower(drive + strafe - turn);
+
+        telemetry.update();
 
     }
+    public double[] pidDrive(double forwardError, double strafeError, double headingError, double dt) {
 
+        double forwardPower = forwardPID.calculate(forwardError, dt);
+        double strafePower  = strafePID.calculate(strafeError, dt);
+        double turnPower    = headingPID.calculate(headingError, dt);
+
+        forwardPower = Math.max(-1, Math.min(1, forwardPower));
+        strafePower  = Math.max(-1, Math.min(1, strafePower));
+        turnPower    = Math.max(-1, Math.min(1, turnPower));
+
+        return new double[]{forwardPower, strafePower, turnPower};
+    }
 }
