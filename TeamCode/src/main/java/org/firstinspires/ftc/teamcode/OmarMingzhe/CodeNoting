@@ -1,10 +1,10 @@
-2/7/26 notes:
-    - pedroteleop10 works but add shooting controls and make sure all telemetry is there.
-    - then add the sutff in it to the autonomous's and perfect those
-    - then work on camera color ball
-
-    for building:
-    -fix intake problems and tighten wheels
+2/14/26 notes:
+    -add april tag stuff and imu to auto (it is perfected in pedroteleop12
+        but can't do multiple turns ( measure how many)
+    -mirror auto from blueback
+    -use color sensor for auto shooting
+    -autonomous used is BlueBackCurved
+    -practice driving
 
 1/23/26 notes:
     -opmodes using:
