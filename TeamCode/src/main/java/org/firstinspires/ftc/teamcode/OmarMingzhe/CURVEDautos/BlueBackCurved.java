@@ -41,7 +41,7 @@ public class BlueBackCurved extends LinearOpMode {
     private Servo gate;
 
     private double backNum = 80;
-    private double RPMlow = 1885;
+    private double RPMlow = 1020; //1885
 
     private final Pose startPose = new Pose(56, 9, Math.toRadians(270));
 
@@ -293,7 +293,26 @@ public class BlueBackCurved extends LinearOpMode {
         stateTimer.resetTimer();
     }
 
+    private void servoSetter() {
+        double currentPos = gate.getPosition();
+        double positionChange = backNum / 1800.0;
+        double newPos = Math.max(0.0, Math.min(1.0, currentPos - positionChange));
+        gate.setPosition(newPos);
+    }
+
+    private void waitForShooterReady() {
+        long start = System.currentTimeMillis();
+        while (opModeIsActive()) {
+            if (shooter.getLeftShooterVelocity() > 880 &&
+                    shooter.getRightShooterVelocity() > 880) break;
+            if (System.currentTimeMillis() - start > 1200) break;
+            sleep(10);
+        }
+    }
+
     private void shootAllBalls() throws InterruptedException {
+        servoSetter();
+        waitForShooterReady();
         intakeTop.setPower(-1);
         sleep(250);
         intakeTop.setPower(1);
