@@ -35,8 +35,15 @@ public class ShooterSubsystemCloseShooting {
 
         shootRight.setDirection(DcMotorEx.Direction.REVERSE);
 
+        shootLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        shootRight.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+
+        shootLeft.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        shootRight.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+
         applyPIDF();
     }
+
 
     private void applyPIDF() {
         PIDFCoefficients leftPIDF = new PIDFCoefficients(baseP, 0.0, baseD, baseFLeft);

@@ -18,12 +18,12 @@ public class teleopHeadlessPIDshootingTest extends LinearOpMode {
     private ShooterSubsystemCloseShooting shooter;
 
     // PIDF tuning variables
-    private double currentP = 14.8;
-    private double currentD = 2.9;
+    private double currentP = 5;
+    private double currentD = 0.7;
 
     // Now independent F values (0.7 difference right 12.1 left 12.8) (right now: left: 12.6 right: 11.9)
-    private double currentFLeft = 6.8;
-    private double currentFRight = 7.2;
+    private double currentFLeft = 12.5;
+    private double currentFRight = 12.5;
 
     // Button edge tracking
     private boolean dpadUpPrev = false;
@@ -39,7 +39,7 @@ public class teleopHeadlessPIDshootingTest extends LinearOpMode {
     private boolean headlessTogglePrev = false;
     private boolean headlessEnabled = true;
 
-    private final double targetRPM = 1500; //2100
+    private final double targetRPM = 1550; //2100
     private final double targetTicksPerSec = (targetRPM / 60.0) * 28;
 
     @Override
