@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.OmarMingzhe.MingzheTests;
+package org.firstinspires.ftc.teamcode.OmarMingzhe.Teleop;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
@@ -16,7 +16,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystemCloseShooting;
 import org.firstinspires.ftc.teamcode.subsystems.PIDControllerSubsystem;
-import org.opencv.core.Mat;
 
 @TeleOp(name = "pedro teleop 12", group = "TeleOp")
 public class pedroteleop12 extends LinearOpMode {

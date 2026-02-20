@@ -5,6 +5,7 @@
     -use color sensor for auto shooting
     -autonomous used is BlueBackCurved
     -practice driving
+    -new robot teleop is newRobotTeleop (test it out on the new robot and this repository or combine what is here)
 
 1/23/26 notes:
     -opmodes using:

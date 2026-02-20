@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.OmarMingzhe.CURVEDautos;
+package org.firstinspires.ftc.teamcode.OmarMingzhe.CURVEDautosTests;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
@@ -16,8 +16,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystemCloseShooting;
 
-@Autonomous(name = "Blue Back CURVED FINAL", group = "Autonomous")
-public class BlueBackCurved extends LinearOpMode {
+@Autonomous(name = "Blue Back 2", group = "Autonomous")
+public class BlueBackCurved2 extends LinearOpMode {
 
     private enum AutoState {
         DRIVE_PATH1A, DRIVE_PATH1B, DRIVE_PATH1C,
@@ -41,7 +41,7 @@ public class BlueBackCurved extends LinearOpMode {
     private Servo gate;
 
     private double backNum = 80;
-    private double RPMlow = 1020; //1885
+    private double RPMlow = 1885;
 
     private final Pose startPose = new Pose(56, 9, Math.toRadians(270));
 
@@ -71,6 +71,9 @@ public class BlueBackCurved extends LinearOpMode {
 
     private AutoState currentState;
     private AutoState lastState = null;
+
+    private static final double POSE_TOLERANCE = 3.5;
+    private static final double HEADING_TOLERANCE = Math.toRadians(5);
 
     private static final PathConstraints FAST =
             new PathConstraints(0.765, 10.2, 0.6375, 0.6375);
@@ -104,6 +107,7 @@ public class BlueBackCurved extends LinearOpMode {
         currentState = AutoState.DRIVE_PATH1A;
 
         waitForStart();
+        stateTimer.resetTimer();
 
         while (opModeIsActive() && currentState != AutoState.DONE) {
 
@@ -116,23 +120,24 @@ public class BlueBackCurved extends LinearOpMode {
                         shooter.setTargetRPM(RPMlow);
                         follower.followPath(path1A, false);
                     }
-                    if (!follower.isBusy()) next(AutoState.DRIVE_PATH1B);
+                    if (complete(preShootPose)) next(AutoState.DRIVE_PATH1B);
                     break;
 
                 case DRIVE_PATH1B:
                     if (entered()) follower.followPath(path1B, false);
-                    if (!follower.isBusy()) next(AutoState.DRIVE_PATH1C);
+                    if (complete(midShootPose)) next(AutoState.DRIVE_PATH1C);
                     break;
 
                 case DRIVE_PATH1C:
                     if (entered()) follower.followPath(path1C, false);
-                    if (!follower.isBusy()) next(AutoState.FIRE_BALLS);
+                    if (complete(launchingPose)) next(AutoState.FIRE_BALLS);
                     break;
 
                 case FIRE_BALLS:
                     if (entered()) {
                         follower.breakFollowing();
-                        stopDrive();
+                        setDrivePower(0,0,0,0);
+                        shooter.setTargetRPM(RPMlow);
                         shootAllBalls();
                         next(AutoState.DRIVE_PATH2_APPROACH);
                     }
@@ -140,15 +145,15 @@ public class BlueBackCurved extends LinearOpMode {
 
                 case DRIVE_PATH2_APPROACH:
                     if (entered()) follower.followPath(path2Approach, false);
-                    if (!follower.isBusy()) next(AutoState.DRIVE_PATH2);
+                    if (complete(row1ApproachPose)) next(AutoState.DRIVE_PATH2);
                     break;
 
                 case DRIVE_PATH2:
                     if (entered()) {
                         follower.followPath(path2, false);
-                        intakeTop.setPower(-1);
+                        intakeTop.setPower(-1.0);
                     }
-                    if (!follower.isBusy()) {
+                    if (complete(path2Pose)) {
                         intakeTop.setPower(0);
                         next(AutoState.DRIVE_PATH3);
                     }
@@ -157,9 +162,9 @@ public class BlueBackCurved extends LinearOpMode {
                 case DRIVE_PATH3:
                     if (entered()) {
                         follower.followPath(path3, false);
-                        intakeTop.setPower(-1);
+                        intakeTop.setPower(-1.0);
                     }
-                    if (!follower.isBusy()) {
+                    if (complete(path3Pose)) {
                         intakeTop.setPower(0);
                         next(AutoState.DRIVE_PATH4A);
                     }
@@ -170,23 +175,24 @@ public class BlueBackCurved extends LinearOpMode {
                         shooter.setTargetRPM(RPMlow);
                         follower.followPath(path4A, false);
                     }
-                    if (!follower.isBusy()) next(AutoState.DRIVE_PATH4B);
+                    if (complete(preShootPose)) next(AutoState.DRIVE_PATH4B);
                     break;
 
                 case DRIVE_PATH4B:
                     if (entered()) follower.followPath(path4B, false);
-                    if (!follower.isBusy()) next(AutoState.DRIVE_PATH4C);
+                    if (complete(midShootPose)) next(AutoState.DRIVE_PATH4C);
                     break;
 
                 case DRIVE_PATH4C:
                     if (entered()) follower.followPath(path4C, false);
-                    if (!follower.isBusy()) next(AutoState.FIRE_BALLS1);
+                    if (complete(launchingPose)) next(AutoState.FIRE_BALLS1);
                     break;
 
                 case FIRE_BALLS1:
                     if (entered()) {
                         follower.breakFollowing();
-                        stopDrive();
+                        setDrivePower(0,0,0,0);
+                        shooter.setTargetRPM(RPMlow);
                         shootAllBalls();
                         next(AutoState.DRIVE_PATH5_APPROACH);
                     }
@@ -194,15 +200,15 @@ public class BlueBackCurved extends LinearOpMode {
 
                 case DRIVE_PATH5_APPROACH:
                     if (entered()) follower.followPath(path5Approach, false);
-                    if (!follower.isBusy()) next(AutoState.DRIVE_PATH5);
+                    if (complete(row2ApproachPose)) next(AutoState.DRIVE_PATH5);
                     break;
 
                 case DRIVE_PATH5:
                     if (entered()) {
                         follower.followPath(path5, false);
-                        intakeTop.setPower(-1);
+                        intakeTop.setPower(-1.0);
                     }
-                    if (!follower.isBusy()) {
+                    if (complete(path5Pose)) {
                         intakeTop.setPower(0);
                         next(AutoState.DRIVE_PATH6);
                     }
@@ -211,9 +217,9 @@ public class BlueBackCurved extends LinearOpMode {
                 case DRIVE_PATH6:
                     if (entered()) {
                         follower.followPath(path6, false);
-                        intakeTop.setPower(-1);
+                        intakeTop.setPower(-1.0);
                     }
-                    if (!follower.isBusy()) {
+                    if (complete(path6Pose)) {
                         intakeTop.setPower(0);
                         next(AutoState.DRIVE_PATH7A);
                     }
@@ -224,23 +230,24 @@ public class BlueBackCurved extends LinearOpMode {
                         shooter.setTargetRPM(RPMlow);
                         follower.followPath(path7A, false);
                     }
-                    if (!follower.isBusy()) next(AutoState.DRIVE_PATH7B);
+                    if (complete(preShootPose)) next(AutoState.DRIVE_PATH7B);
                     break;
 
                 case DRIVE_PATH7B:
                     if (entered()) follower.followPath(path7B, false);
-                    if (!follower.isBusy()) next(AutoState.DRIVE_PATH7C);
+                    if (complete(midShootPose)) next(AutoState.DRIVE_PATH7C);
                     break;
 
                 case DRIVE_PATH7C:
                     if (entered()) follower.followPath(path7C, false);
-                    if (!follower.isBusy()) next(AutoState.FIRE_BALLS2);
+                    if (complete(launchingPose)) next(AutoState.FIRE_BALLS2);
                     break;
 
                 case FIRE_BALLS2:
                     if (entered()) {
                         follower.breakFollowing();
-                        stopDrive();
+                        setDrivePower(0,0,0,0);
+                        shooter.setTargetRPM(RPMlow);
                         shootAllBalls();
                         next(AutoState.DRIVE_PATH8_APPROACH);
                     }
@@ -248,15 +255,15 @@ public class BlueBackCurved extends LinearOpMode {
 
                 case DRIVE_PATH8_APPROACH:
                     if (entered()) follower.followPath(path8Approach, false);
-                    if (!follower.isBusy()) next(AutoState.DRIVE_PATH8);
+                    if (complete(row3ApproachPose)) next(AutoState.DRIVE_PATH8);
                     break;
 
                 case DRIVE_PATH8:
                     if (entered()) {
                         follower.followPath(path8, false);
-                        intakeTop.setPower(-1);
+                        intakeTop.setPower(-1.0);
                     }
-                    if (!follower.isBusy()) {
+                    if (complete(path8Pose)) {
                         intakeTop.setPower(0);
                         next(AutoState.DRIVE_PATH9);
                     }
@@ -265,9 +272,9 @@ public class BlueBackCurved extends LinearOpMode {
                 case DRIVE_PATH9:
                     if (entered()) {
                         follower.followPath(path9, false);
-                        intakeTop.setPower(-1);
+                        intakeTop.setPower(-1.0);
                     }
-                    if (!follower.isBusy()) {
+                    if (complete(path9Pose)) {
                         intakeTop.setPower(0);
                         next(AutoState.DONE);
                     }
@@ -277,20 +284,36 @@ public class BlueBackCurved extends LinearOpMode {
 
         shooter.stopShooter();
         intakeTop.setPower(0);
-        stopDrive();
+        setDrivePower(0,0,0,0);
     }
 
     private boolean entered() {
         if (lastState != currentState) {
             lastState = currentState;
+            stateTimer.resetTimer();
             return true;
         }
         return false;
     }
 
-    private void next(AutoState newState) {
-        currentState = newState;
-        stateTimer.resetTimer();
+    private void next(AutoState s) {
+        currentState = s;
+    }
+
+    private boolean complete(Pose target) {
+        Pose p = follower.getPose();
+        double posError = Math.hypot(p.getX() - target.getX(),
+                p.getY() - target.getY());
+        double headingError = Math.abs(normalizeAngle(
+                p.getHeading() - target.getHeading()));
+        return posError < POSE_TOLERANCE &&
+                headingError < HEADING_TOLERANCE;
+    }
+
+    private double normalizeAngle(double angle) {
+        while (angle > Math.PI) angle -= 2 * Math.PI;
+        while (angle < -Math.PI) angle += 2 * Math.PI;
+        return angle;
     }
 
     private void servoSetter() {
@@ -303,8 +326,8 @@ public class BlueBackCurved extends LinearOpMode {
     private void waitForShooterReady() {
         long start = System.currentTimeMillis();
         while (opModeIsActive()) {
-            if (shooter.getLeftShooterVelocity() > 880 &&
-                    shooter.getRightShooterVelocity() > 880) break;
+            if (shooter.getLeftShooterVelocity() > 920 &&
+                    shooter.getRightShooterVelocity() > 920) break;
             if (System.currentTimeMillis() - start > 1200) break;
             sleep(10);
         }
@@ -313,21 +336,22 @@ public class BlueBackCurved extends LinearOpMode {
     private void shootAllBalls() throws InterruptedException {
         servoSetter();
         waitForShooterReady();
-        intakeTop.setPower(-1);
+
+        intakeTop.setPower(-1.0);
         sleep(250);
         intakeTop.setPower(1);
         sleep(150);
         intakeTop.setPower(0);
         sleep(733);
 
-        intakeTop.setPower(-1);
+        intakeTop.setPower(-1.0);
         sleep(350);
         intakeTop.setPower(1);
         sleep(150);
         intakeTop.setPower(0);
         sleep(533);
 
-        intakeTop.setPower(-1);
+        intakeTop.setPower(-1.0);
         sleep(700);
 
         intakeTop.setPower(0);
@@ -335,11 +359,11 @@ public class BlueBackCurved extends LinearOpMode {
         gate.setPosition(1.0);
     }
 
-    private void stopDrive() {
-        frontLeft.setPower(0);
-        frontRight.setPower(0);
-        backLeft.setPower(0);
-        backRight.setPower(0);
+    private void setDrivePower(double lf, double rf, double lb, double rb) {
+        frontLeft.setPower(lf);
+        frontRight.setPower(rf);
+        backLeft.setPower(lb);
+        backRight.setPower(rb);
     }
 
     private void buildPaths() {

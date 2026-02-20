@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 @TeleOp(name = "April Tag backup", group = "collios")
-public class nig0er extends LinearOpMode {
+public class sigTest extends LinearOpMode {
 
     // ---------------- HARDWARE ----------------
     private DcMotor frontLeft, frontRight, backLeft, backRight;
