@@ -20,7 +20,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystemCloseShooting;
 
-@Autonomous(name = "Blue Back Meet 4", group = "Autonomous")
+@Autonomous(name = "<>Blue Back Meet 4<>", group = "Autonomous")
 public class BlueBackMeet4 extends LinearOpMode {
 
     // ---------------- State Machine ----------------
@@ -87,8 +87,8 @@ public class BlueBackMeet4 extends LinearOpMode {
     private static final double POSE_TOLERANCE = 3.5;
     private static final double STATE_TIMEOUT = 3.0;
 
-    private double RPMshot = 2025;
-    private double RPMlow = 2025;
+    private double RPMshot = 1500;
+    private double RPMlow = 1500;
 
     @Override
     public void runOpMode() throws InterruptedException {

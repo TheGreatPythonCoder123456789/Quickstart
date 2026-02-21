@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems;
-
+//whatever you see the BASE PIDF are the far values not close ones. screw where you use them,
+//that is the name.
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
@@ -12,16 +13,16 @@ public class ShooterSubsystemCloseShooting {
     private static final int TICKS_PER_REV = 28;
 
     // CLOSE PIDF (current)
-    private double closeP = 14.2;
-    private double closeD = 2.9;
-    private double closeFLeft = 6.8;
-    private double closeFRight = 7.2;
+    private double closeP = 8.4; //6.9
+    private double closeD = 0.6; //1.1
+    private double closeFLeft = 11; //12.3
+    private double closeFRight = 10.8; //11.7
 
     // FAR PIDF (put your far-tuned values here)
-    private double farP = 6.9;
-    private double farD = 1.1;
-    private double farFLeft = 12.3;
-    private double farFRight = 11.7;
+    private double farP = 8.4; //6.9
+    private double farD = 0.6; //1.1
+    private double farFLeft = 11; //12.3
+    private double farFRight = 10.8; //11.7
 
     // Active PIDF
     private double baseP = farP;
