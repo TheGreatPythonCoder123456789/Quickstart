@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.OmarMingzhe.Autonomous;
+package org.firstinspires.ftc.teamcode.OmarMingzhe.CURVEDautosTests;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;

@@ -202,7 +202,7 @@ public class teleopHeadlessAndroidStudio extends LinearOpMode {
 
         // ------------------ SHOOTER ------------------
         if (gamepad2.right_trigger > 0) {
-            shooter.setTargetRPM(2050);
+            shooter.setTargetRPM(1530);
         } else {
             shooter.stopShooter();
         }

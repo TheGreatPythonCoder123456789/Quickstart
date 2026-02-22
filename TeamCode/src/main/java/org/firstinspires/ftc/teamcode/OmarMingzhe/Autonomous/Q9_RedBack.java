@@ -61,7 +61,7 @@ public class Q9_RedBack extends LinearOpMode {
             new Pose(144 - 57.55, 86.84, Math.toRadians(219));
 
     private final Pose launchingPose =
-            new Pose(144 - 57.55, 89.84, Math.toRadians(213.5));
+            new Pose(144 - 53.55, 89.84, Math.toRadians(209.5));
 
     // ---------------- INTAKE / TRAVEL POSES ----------------
     private final Pose row1ApproachPose =
@@ -77,19 +77,19 @@ public class Q9_RedBack extends LinearOpMode {
             new Pose(144 - 52, 84, Math.toRadians(0));
 
     private final Pose path3Pose =
-            new Pose(144 - 15, 84, Math.toRadians(0));
+            new Pose(135, 84, Math.toRadians(0));
 
     private final Pose path5Pose =
             new Pose(144 - 52, 60, Math.toRadians(0));
 
     private final Pose path6Pose =
-            new Pose(144 - 9, 60, Math.toRadians(0));
+            new Pose(142, 60, Math.toRadians(0));
 
     private final Pose path8Pose =
             new Pose(144 - 52, 36, Math.toRadians(0));
 
     private final Pose path9Pose =
-            new Pose(144 - 9, 36, Math.toRadians(0));
+            new Pose(142, 36, Math.toRadians(0));
 
     // ---------------- PathChains ----------------
     private PathChain path1A, path1B, path1C;

@@ -17,8 +17,8 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystemCloseShooting;
 import org.firstinspires.ftc.teamcode.subsystems.PIDControllerSubsystem;
 
-@TeleOp(name = "<>teleopRedSide<>", group = "TeleOp")
-public class teleopRedSide extends LinearOpMode {
+@TeleOp(name = "<>teleopCornerRed<>", group = "TeleOp")
+public class telelopCornerRed extends LinearOpMode {
 
     private DcMotor frontLeft, frontRight, backLeft, backRight, intakeTop;
     private Servo gate;
@@ -31,7 +31,7 @@ public class teleopRedSide extends LinearOpMode {
     private PathChain goToLaunchPath;
     private double imuu;
 
-    private final Pose startPose = new Pose(135, 36, Math.toRadians(270));
+    private final Pose startPose = new Pose(135, 9, Math.toRadians(270));
     private final Pose launchingPose =
             new Pose(86.45, 89.84, Math.toRadians(213.5));
 
@@ -59,7 +59,7 @@ public class teleopRedSide extends LinearOpMode {
     private boolean shooterAutoActive = false;
     private static final long SHOOTER_AUTO_DURATION = 5000;
 
-    enum AssistState {
+    private enum AssistState {
         MANUAL,
         GO_TO_LAUNCH_POSE,
         WAIT_FOR_TAG,

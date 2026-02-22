@@ -17,8 +17,10 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystemCloseShooting;
 import org.firstinspires.ftc.teamcode.subsystems.PIDControllerSubsystem;
 
-@TeleOp(name = "<>teleopRedSide<>", group = "TeleOp")
-public class teleopRedSide extends LinearOpMode {
+@TeleOp(name = "<>teleopCornerBlue<>", group = "TeleOp")
+public class teleopCornerBlue extends LinearOpMode {
+
+    /* ================= HARDWARE ================= */
 
     private DcMotor frontLeft, frontRight, backLeft, backRight, intakeTop;
     private Servo gate;
@@ -27,13 +29,17 @@ public class teleopRedSide extends LinearOpMode {
     private ShooterSubsystemCloseShooting shooter;
     private HuskyLens huskyLens;
 
+    /* ================= PEDRO ================= */
+
     private Follower follower;
     private PathChain goToLaunchPath;
     private double imuu;
 
-    private final Pose startPose = new Pose(135, 36, Math.toRadians(270));
-    private final Pose launchingPose =
-            new Pose(86.45, 89.84, Math.toRadians(213.5));
+    private final Pose startPose = new Pose(9, 9, Math.toRadians(270));
+    private Pose launchingPose =
+            new Pose(57.55, 89.84, Math.toRadians(-35));
+
+    /* ================= APRIL TAG CAMERA ================= */
 
     private static final double CAMERA_FOV_X = 50.0;
     private static final int CAMERA_RES_X = 320;
@@ -49,17 +55,23 @@ public class teleopRedSide extends LinearOpMode {
     private static final double STRAFE_THRESHOLD = 6.0;
     private static final double HEADING_THRESHOLD = 2.5;
 
+    /* ================= PID ================= */
+
     private PIDControllerSubsystem forwardPID;
     private PIDControllerSubsystem strafePID;
     private PIDControllerSubsystem headingPID;
 
     private long lastPIDTime = 0;
 
+    /* ================= SHOOTER AUTO ================= */
+
     private long shooterAutoStartTime = 0;
     private boolean shooterAutoActive = false;
     private static final long SHOOTER_AUTO_DURATION = 5000;
 
-    enum AssistState {
+    /* ================= STATE ================= */
+
+    private enum AssistState {
         MANUAL,
         GO_TO_LAUNCH_POSE,
         WAIT_FOR_TAG,
@@ -69,6 +81,8 @@ public class teleopRedSide extends LinearOpMode {
     }
 
     private AssistState assistState = AssistState.MANUAL;
+
+    /* ================= FLAGS ================= */
 
     private boolean headlessEnabled = true;
     private boolean xPrev = false;
@@ -99,6 +113,7 @@ public class teleopRedSide extends LinearOpMode {
 
             follower.update();
 
+            // Shooter auto timer
             if (shooterAutoActive) {
                 shooter.setTargetRPM(1550);
                 if (System.currentTimeMillis() - shooterAutoStartTime > SHOOTER_AUTO_DURATION) {
@@ -117,6 +132,7 @@ public class teleopRedSide extends LinearOpMode {
             xPrev = gamepad1.x;
 
             if (xPressed && assistState == AssistState.MANUAL) {
+
                 shooterAutoStartTime = System.currentTimeMillis();
                 shooterAutoActive = true;
 
@@ -124,7 +140,8 @@ public class teleopRedSide extends LinearOpMode {
                     headingPID.reset();
                     lastPIDTime = System.nanoTime();
                     assistState=AssistState.REGULATE_IMU_INI;
-                } else {
+                }
+                else {
                     buildPathFromCurrentPose();
                     follower.followPath(goToLaunchPath, false);
                     assistState = AssistState.GO_TO_LAUNCH_POSE;
@@ -147,7 +164,7 @@ public class teleopRedSide extends LinearOpMode {
                     break;
 
                 case WAIT_FOR_TAG:
-                    if (findApril(2) != null) {
+                    if (findApril(1) != null) {   // 🔵 BLUE TAG
                         forwardPID.reset();
                         strafePID.reset();
                         headingPID.reset();
@@ -201,8 +218,8 @@ public class teleopRedSide extends LinearOpMode {
 
             telemetry.addLine("\n========== APRIL TAG ==========");
             HuskyLens.Block debugTag = findApril( (assistState == AssistState.APRIL_ALIGN || assistState == AssistState.WAIT_FOR_TAG)
-                    ? 2   // Blue uses 1 — change to 2 for red if you want hardcoded
-                    : 2);
+                    ? 1   // Blue uses 1 — change to 2 for red if you want hardcoded
+                    : 1);
 
             if (debugTag != null) {
                 telemetry.addData("Tag ID", debugTag.id);
@@ -225,6 +242,8 @@ public class teleopRedSide extends LinearOpMode {
             telemetry.addData("Gate Open Flag", gateOpen);
         }
     }
+
+    /* ================= MANUAL ================= */
 
     private void runManualTeleop() {
 
@@ -277,8 +296,11 @@ public class teleopRedSide extends LinearOpMode {
         bPrev = gamepad2.b;
     }
 
+    /* ================= HELPERS ================= */
+
     private void regulateAprilTag() {
-        HuskyLens.Block tag = findApril(2);
+
+        HuskyLens.Block tag = findApril(1);
         if (tag == null) return;
 
         double distanceToTag =
@@ -322,7 +344,7 @@ public class teleopRedSide extends LinearOpMode {
         if (headingError == 0) {
             stopDrive();
             if(assistState==AssistState.REGULATE_IMU) assistState = AssistState.WAIT_FOR_TAG;
-            else {
+            else{
                 buildPathFromCurrentPose();
                 follower.followPath(goToLaunchPath, false);
                 assistState = AssistState.GO_TO_LAUNCH_POSE;
